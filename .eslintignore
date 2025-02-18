@@ -7,6 +7,8 @@
 .sf/
 .localdevserver
 **/staticresources/
+IlluminatedCloud/
+.illuminatedCloud/
 
 # Dependencies
 **/node_modules/
@@ -15,6 +17,8 @@
 # Build
 **/build/
 **/dist/
+out/
+target/
 
 # System Files
 .DS_Store

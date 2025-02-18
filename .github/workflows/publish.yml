@@ -1,0 +1,36 @@
+name: Publish Package
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - "src/**"
+
+jobs:
+  packaging:
+    name: "Create and release a new package version"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: "Restore node_modules cache"
+        id: cache-npm
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            npm-${{ env.cache-name }}-
+            npm-
+
+      - name: "Install npm dependencies"
+        if: steps.cache-npm.outputs.cache-hit != 'true'
+        run: npm i
+
+      - name: "Install jq"
+        run: sudo apt update && sudo apt -y install jq
+
+      - name: "Checkout source code"
+        uses: actions/checkout@v3

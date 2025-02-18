@@ -6,14 +6,16 @@
 .sf/
 .localdevserver/
 IlluminatedCloud/
+.illuminatedCloud/
 
 # Dependencies
 **/node_modules/
-**/package-lock.json
 
 # Build
 **/build/
 **/dist/
+out/
+target/
 
 # System Files
 .DS_Store
