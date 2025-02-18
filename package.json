@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@babel/eslint-parser": "^7.25.8",
+    "@types/node": "^22.13.4",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-import": "^2.31.0",
@@ -38,5 +39,9 @@
     "**/*.{js,ts}": [
       "npm run eslint"
     ]
+  },
+  "dependencies": {
+    "@types/express": "^5.0.0",
+    "express": "^4.21.2"
   }
 }

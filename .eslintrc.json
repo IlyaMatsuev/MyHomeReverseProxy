@@ -14,7 +14,7 @@
     "no-return-assign": "off",
     "no-await-in-loop": "warn",
     "no-prototype-builtins": "warn",
-    "no-console": ["error", { "allow": ["warn", "error"] }],
+    "no-console": "off",
     "no-self-compare": "error",
     "no-template-curly-in-string": "error",
     "no-unreachable-loop": "error",

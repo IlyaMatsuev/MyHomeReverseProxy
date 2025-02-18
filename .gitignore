@@ -24,3 +24,6 @@ target/
 
 # Logs
 *.log
+
+# Others
+config/addresses.prod.json
