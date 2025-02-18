@@ -7,7 +7,6 @@ RUN npm install --silent
 
 COPY . ./
 
-# TODO: Make it 80
 EXPOSE 80
 
 CMD ["npm", "start"]

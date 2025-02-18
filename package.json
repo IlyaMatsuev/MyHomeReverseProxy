@@ -10,7 +10,9 @@
     "prettier:verify": "prettier --list-different",
     "eslint": "eslint --fix",
     "eslint:verify": "eslint --quiet",
-    "start": "node src/index.js"
+    "build:image": "docker compose build reverse-proxy",
+    "start": "node src/index.js",
+    "start:prod": "docker compose up reverse-proxy"
   },
   "author": {
     "name": "Ilya Matsuev",
