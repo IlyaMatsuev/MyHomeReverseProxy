@@ -7,30 +7,25 @@ on:
       - main
     paths:
       - "src/**"
+      - "Dockerfile"
+
+# Secrets required for this action:
+# 1. DOCKER_USERNAME - username of the docker account
+# 2. DOCKER_ACCESS_TOKEN - docker personal access token used to log in into the registry
 
 jobs:
-  packaging:
-    name: "Create and release a new package version"
+  publish-image:
+    name: "Publish the latest docker image version"
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - name: "Restore node_modules cache"
-        id: cache-npm
-        uses: actions/cache@v1
-        with:
-          path: node_modules
-          key: npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            npm-${{ env.cache-name }}-
-            npm-
-
-      - name: "Install npm dependencies"
-        if: steps.cache-npm.outputs.cache-hit != 'true'
-        run: npm i
-
-      - name: "Install jq"
-        run: sudo apt update && sudo apt -y install jq
-
       - name: "Checkout source code"
         uses: actions/checkout@v3
+
+      - name: "Login to DockerHub"
+        run: echo ${{ secrets.DOCKER_ACCESS_TOKEN }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+
+      - name: "Build the image"
+        run: npm run build:image
+
+      - name: "Push the image"
+        run: docker push "${{ secrets.DOCKER_USERNAME }}/reverse-proxy"

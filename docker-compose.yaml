@@ -2,6 +2,7 @@ version: "3.8"
 services:
   reverse-proxy:
     image: ilyamatsuev/reverse-proxy
+    container_name: reverse-proxy
     build: .
     restart: always
     ports:
