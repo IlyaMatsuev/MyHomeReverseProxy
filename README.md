@@ -1,59 +1,38 @@
-# Project Name
+# My Reverse Proxy
 
-Badges.
+The project is a simple reverse proxy that is used mainly to forward requests for domains with the same IP address to the same machine but on different ports.
 
-Project description and idea.
+It is super simple and serves a single purpose - forwarding HTTP requests to the right server on the right port depending on the domain name the request has been made to.
 
-- ✅ Advantage
-- ✅ Another advantage
-- ❌ Disadvantage
+## 🔍 Usage
 
-## 🔍 Overview
+To run the server locally (uses `NODE_ENV=dev`):
 
-Some basic usage example:
-
-```java
-System.debug('Hello World!');
+```bash
+npm start
 ```
 
-For more examples, please refer to the [examples page](docs/examples).
+To run the server via the docker image (uses `NODE_ENV=prod`):
 
-Project notes.
-
-## 🚀 Installation
-
-### From Unmanaged Package
-
-You can just install the package by the link on a [sandbox](https://test.salesforce.com/packaging/installPackage.apexp?p0=<package-id>) or [dev org](https://login.salesforce.com/packaging/installPackage.apexp?p0=<package-id>).
-
-If you prefer using salesforce CLI you can run:
-
-```
-sfdx force:package:install -p <package-id> -w 10 -b 10 -u <username>
-```
-
-### From Source
-
-You can also install the package with the automated scripts: [`pkg-deploy.sh`](scripts/pkg-deploy.sh) and [`pkg-from-scratch.sh`](scripts/pkg-from-scratch.sh).  
-First is for deploying changes to the existing org.
-
-```
-./scripts/pkg-deploy.sh <username-or-alias>
-```
-
-Second is for creating a new configured scratch org.
-
-```
-./scripts/pkg-from-scratch.sh <devhub-username-or-alias> <new-scratch-org-alias>
+```bash
+npm run start:prod
 ```
 
 ## 🛠️ Configuration
 
-Custom settings, custom metadata or any other configuration example.
+The server is configurable via the `config/addresses.[dev|prod].json` file.
+The key is the domain name that needs to be resolved, the value is the object containing of the hostname and the port where the requests on that domain need to be forwarded to:
 
-## 📝 Documentation
+```json
+{
+    "test.domain.home": {
+        "hostname": "111.222.333.4",
+        "port": 8888
+    }
+}
+```
 
-For more detailed information about the content of the repository and the sfdx package, please visit the [docs folder](docs).
+With this configuration, any request coming to `http://test.domain.home` will be forwarded to `http://111.222.333.4:8888`.
 
 ## ❓ Questions
 
