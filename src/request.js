@@ -27,10 +27,7 @@ exports.httpRequest = function (options) {
     return new Promise((resolve, reject) => {
         const request = http.request(requestOptions, response => {
             let data = '';
-            response.on('data', chunk => {
-                console.log(`Received data: ${chunk}`);
-                data += chunk;
-            });
+            response.on('data', chunk => data += chunk);
             response.on('end', () => resolve({ ...response, headers: response.headers, data }));
         });
         request.on('error', error => reject(error));
