@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
 const { httpRequest } = require('./request');
+const { authorized } = require('./auth');
+const { log } = require('./logger');
 
 const PORT = process.env.PORT || 80;
 const ENV = process.env.NODE_ENV || 'dev';
@@ -15,15 +17,22 @@ server.use(bodyParser.json());
 
 server.use((request, response) => {
     const host = request.get('host');
-    console.log(`Received request on ${host}`);
+    const clientAddress = request.socket.address().address;
+    console.log(log(`Received request on "${host}" from "${clientAddress}"`));
+
+    if (!authorized(request)) {
+        console.warn(log(`The incoming request from "${clientAddress}" was not authorized`));
+        response.status(403).json({ message: 'Forbidden' });
+        return;
+    }
 
     const targetAddress = addresses[host];
     if (!targetAddress) {
-        console.log(`Could not resolve host: ${host}`);
+        console.log(log(`Could not resolve host: ${host}`));
         response.status(404).json({ message: 'Not Found' });
         return;
     }
-    console.log(`Resolved address: ${targetAddress.hostname}:${targetAddress.port}${request.url}`);
+    console.log(log(`Resolved address: ${targetAddress.hostname}:${targetAddress.port}${request.url}`));
 
     const options = {
         hostname: targetAddress.hostname,
@@ -37,10 +46,10 @@ server.use((request, response) => {
     httpRequest(options)
         .then(res => response.set(res.headers).status(res.statusCode).end(res.data))
         .catch(error => {
-            console.error(`Error: ${error}`);
-            console.error(`Stack Trace: ${error.stack}`);
+            console.error(log(`Error: ${error}`));
+            console.error(log(`Stack Trace: ${error.stack}`));
             response.status(500).json({ message: error.message });
         });
 });
 
-server.listen(PORT, () => console.info(`Listening on port ${PORT}`));
+server.listen(PORT, '0.0.0.0', () => console.info(log(`Listening on port ${PORT}`)));

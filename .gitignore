@@ -26,4 +26,6 @@ target/
 *.log
 
 # Others
-config/addresses.prod.json
+**/tsconfig*.json
+**/*.tsbuildinfo
+**/*.prod.json
