@@ -20,6 +20,10 @@ server.use((request, response) => {
     const clientAddress = request.socket.address().address;
     console.log(log(`Received request on "${host}" from "${clientAddress}"`));
 
+    console.log(`req.ip: ${request.ip}`);
+    console.log(`x-forwarded-for: ${request.headers['x-forwarded-for']}`);
+    console.log(`remoteAddress: ${request.socket.address().address}`);
+
     if (!authorized(request)) {
         console.warn(log(`The incoming request from "${clientAddress}" was not authorized`));
         response.status(403).json({ message: 'Forbidden' });
