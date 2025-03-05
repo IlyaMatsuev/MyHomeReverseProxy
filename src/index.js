@@ -1,28 +1,42 @@
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
+const { rateLimit } = require('express-rate-limit');
 const { httpRequest } = require('./request');
-const { authorized } = require('./auth');
+const { authorized, fromLocalNetwork } = require('./auth');
 const { log } = require('./logger');
 
 const PORT = process.env.PORT || 80;
 const ENV = process.env.NODE_ENV || 'dev';
-
 const addresses = require(`../config/addresses.${ENV}.json`) || {};
+const limits = require(`../config/limits.${ENV}.json`) || {};
+
+const limiter = rateLimit({
+    windowMs: limits.windowMs,
+    limit: limits.requestsPerWindow,
+    standardHeaders: false,
+    legacyHeaders: false,
+    statusCode: limits.blocked.statusCode,
+    message: limits.blocked.message,
+    skip: request => {
+        const local = fromLocalNetwork(request.ip);
+        if (local) {
+            console.log(log(`Skipping rate limiter for local request from ${request.ip}`));
+        }
+        return local;
+    },
+});
 
 const server = express();
 
 server.use(cors());
 server.use(bodyParser.json());
+server.use(limiter);
 
 server.use((request, response) => {
-    const host = request.get('host');
-    const clientAddress = request.socket.address().address;
+    const host = request.query.host || request.get('host');
+    const clientAddress = request.ip;
     console.log(log(`Received request on "${host}" from "${clientAddress}"`));
-
-    console.log(`req.ip: ${request.ip}`);
-    console.log(`x-forwarded-for: ${request.headers['x-forwarded-for']}`);
-    console.log(`remoteAddress: ${request.socket.address().address}`);
 
     if (!authorized(request)) {
         console.warn(log(`The incoming request from "${clientAddress}" was not authorized`));

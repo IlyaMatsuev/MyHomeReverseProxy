@@ -11,7 +11,7 @@ const AUTH_HEADER_NAME = 'X-Proxy-Authorization';
  * @return {boolean}
  */
 exports.authorized = function (request) {
-    if (fromLocalNetwork(request.socket.address().address)) {
+    if (module.exports.fromLocalNetwork(request.ip)) {
         return true;
     }
     const authHeader = request.header(AUTH_HEADER_NAME);
@@ -24,9 +24,14 @@ exports.authorized = function (request) {
     );
 };
 
-function fromLocalNetwork(remoteAddress) {
+/**
+ * Checks if the provided IP address is coming from the local network or not
+ * @param remoteAddress The IP address to check
+ * @return {boolean}
+ */
+exports.fromLocalNetwork = function (remoteAddress) {
     return new RegExp(secrets.localAddressPattern, 'g').test(remoteAddress);
-}
+};
 
 function compareCredential(credential, hash) {
     const [hashedCredential, salt] = hash.split('.');

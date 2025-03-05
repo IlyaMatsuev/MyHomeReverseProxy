@@ -2,6 +2,8 @@
 
 The project is a simple reverse proxy that is used mainly to forward requests for domains with the same IP address to the same machine but on different ports.
 
+This server is also designed to allow requests from the local network but require authorization when the request comes from the Internet.
+
 It is super simple and serves a single purpose - forwarding HTTP requests to the right server on the right port depending on the domain name the request has been made to.
 
 ## 🔍 Usage
@@ -32,7 +34,22 @@ The key is the domain name that needs to be resolved, the value is the object co
 }
 ```
 
-With this configuration, any request coming to `http://test.domain.home` will be forwarded to `http://111.222.333.4:8888`.
+With this configuration, any request coming to `http://test.domain.home` will be forwarded to `http://111.222.333.4:8888` (if request comes from the local network).
+
+For requests coming from the Internet, there needs to be specified another config file `config/addresses.[dev|prod].json`:
+
+```json
+{
+    "username": "user",
+    "password": "pass",
+    "secret": "secret",
+    "localAddressPattern": "^127\\.0\\.0\\.1$"
+}
+```
+
+You specify user credentials that will need to be passed on to the `X-Proxy-Authorization` header.
+
+You can also use a query parameter `host` for your requests to the proxy in order to resolve the destination server.
 
 ## ❓ Questions
 

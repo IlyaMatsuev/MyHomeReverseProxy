@@ -1,0 +1,10 @@
+{
+  "windowMs": 900000,
+  "requestsPerWindow": 1,
+  "blocked": {
+    "statusCode": 403,
+    "message": {
+      "message": "Forbidden"
+    }
+  }
+}
