@@ -18,10 +18,8 @@ exports.authorized = function (request) {
     if (!authHeader) {
         return false;
     }
-    const [username, passwordHash, secretHash] = Buffer.from(authHeader, 'base64').toString().split(':');
-    return (
-        username === secrets.username && compareCredential(secrets.password, passwordHash) && compareCredential(secrets.secret, secretHash)
-    );
+    const [username, password, secret] = Buffer.from(authHeader, 'base64').toString().split(':');
+    return username === secrets.username && compareCredential(secrets.password, password) && compareCredential(secrets.secret, secret);
 };
 
 /**
@@ -33,8 +31,8 @@ exports.fromLocalNetwork = function (remoteAddress) {
     return new RegExp(secrets.localAddressPattern, 'g').test(remoteAddress);
 };
 
-function compareCredential(credential, hash) {
-    const [hashedCredential, salt] = hash.split('.');
-    const credentialHashBuffer = scryptSync(credential, salt, 64);
-    return timingSafeEqual(Buffer.from(hashedCredential, 'hex'), credentialHashBuffer);
+function compareCredential(storedHash, credential) {
+    const [hashedCredential, salt] = storedHash.split('.');
+    const hashBuffer = scryptSync(credential, salt, 64);
+    return timingSafeEqual(Buffer.from(hashedCredential, 'hex'), hashBuffer);
 }
