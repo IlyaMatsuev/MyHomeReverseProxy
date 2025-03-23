@@ -6,7 +6,7 @@ const { rateLimit } = require('express-rate-limit');
 const { getSSLOptions } = require('./ssl');
 const { httpRequest } = require('./request');
 const { authorized, fromLocalNetwork } = require('./auth');
-const { log } = require('./logger');
+const { log, warn, error } = require('./logger');
 
 const PORT = 443;
 const PORT_HTTP = 80;
@@ -24,7 +24,7 @@ const limiter = rateLimit({
     skip: request => {
         const local = fromLocalNetwork(request.ip);
         if (local) {
-            console.log(log(`Skipping rate limiter for local request from ${request.ip}`));
+            log(`Skipping rate limiter for local request from ${request.ip}`);
         }
         return local;
     },
@@ -39,21 +39,21 @@ server.use(limiter);
 server.use((request, response) => {
     const host = request.query.host || request.get('host');
     const clientAddress = request.ip;
-    console.log(log(`Received request on "${host}" from "${clientAddress}"`));
+    log(`Received request on "${host}" from "${clientAddress}"`);
 
     if (!authorized(request)) {
-        console.warn(log(`The incoming request from "${clientAddress}" was not authorized`));
+        warn(`The incoming request from "${clientAddress}" was not authorized`);
         response.status(403).json({ message: 'Forbidden' });
         return;
     }
 
     const targetAddress = addresses[host];
     if (!targetAddress) {
-        console.log(log(`Could not resolve host: ${host}`));
+        log(`Could not resolve host: ${host}`);
         response.status(404).json({ message: 'Not Found' });
         return;
     }
-    console.log(log(`Resolved address: ${targetAddress.hostname}:${targetAddress.port}${request.url}`));
+    log(`Resolved address: ${targetAddress.hostname}:${targetAddress.port}${request.url}`);
 
     const options = {
         hostname: targetAddress.hostname,
@@ -66,17 +66,17 @@ server.use((request, response) => {
 
     httpRequest(options)
         .then(res => response.set(res.headers).status(res.statusCode).end(res.data))
-        .catch(error => {
-            console.error(log(`Error: ${error}`));
-            console.error(log(`Stack Trace: ${error.stack}`));
-            response.status(500).json({ message: error.message });
+        .catch(e => {
+            error(`Error: ${e}`);
+            error(`Stack Trace: ${e.stack}`);
+            response.status(500).json({ message: e.message });
         });
 });
 
 const sslOptions = getSSLOptions();
 if (sslOptions) {
-    https.createServer(sslOptions, server).listen(PORT, '0.0.0.0', () => console.info(log(`Listening on port ${PORT}`)));
+    https.createServer(sslOptions, server).listen(PORT, '0.0.0.0', () => log(`Listening on port ${PORT}`));
 } else {
-    console.warn(log('Running HTTP server since no SSL certificate has been provided'));
-    server.listen(PORT_HTTP, '0.0.0.0', () => console.info(log(`Listening on port ${PORT_HTTP}`)));
+    warn('Running HTTP server since no SSL certificate has been provided');
+    server.listen(PORT_HTTP, '0.0.0.0', () => log(`Listening on port ${PORT_HTTP}`));
 }

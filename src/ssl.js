@@ -1,4 +1,4 @@
-const { log } = require('./logger');
+const { error } = require('./logger');
 const fs = require('fs');
 
 const SSL_KEY_FILE_PATH = './ssl/key.pem';
@@ -10,7 +10,7 @@ const SSL_CERT_FILE_PATH = './ssl/fullchain.pem';
  */
 exports.getSSLOptions = function () {
     if (!fs.existsSync(SSL_KEY_FILE_PATH) || !fs.existsSync(SSL_CERT_FILE_PATH)) {
-        console.error(log(`No SSL certificate files found under the /ssl directory`));
+        error(`No SSL certificate files found under the /ssl directory`);
         return null;
     }
     return {
