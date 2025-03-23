@@ -27,6 +27,7 @@ target/
 
 # SSL
 ssl/**
+!ssl/README.md
 
 # Others
 **/tsconfig*.json

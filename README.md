@@ -8,6 +8,8 @@ It is super simple and serves a single purpose - forwarding HTTP requests to the
 
 ## 🔍 Usage
 
+> Before building/running the server, make sure that the SSL certificate is configured and renewed. SSL setup instructions are described [here](/ssl).
+
 To run the server locally (uses `NODE_ENV=dev`):
 
 ```bash
@@ -22,8 +24,8 @@ npm run start:prod
 
 ## 🛠️ Configuration
 
-The server is configurable via the `config/addresses.[dev|prod].json` file.
-The key is the domain name that needs to be resolved, the value is the object containing of the hostname and the port where the requests on that domain need to be forwarded to:
+- The server is configurable via the `config/addresses.[dev|prod].json` file.
+  The key is the domain name that needs to be resolved, the value is the object containing of the hostname and the port where the requests on that domain need to be forwarded to:
 
 ```json
 {
@@ -36,7 +38,7 @@ The key is the domain name that needs to be resolved, the value is the object co
 
 With this configuration, any request coming to `http://test.domain.home` will be forwarded to `http://111.222.333.4:8888` (if request comes from the local network).
 
-For requests coming from the Internet, there needs to be specified another config file `config/addresses.[dev|prod].json`:
+- For requests coming from the Internet, another config file `config/addresses.[dev|prod].json` needs to be specified:
 
 ```json
 {
@@ -50,6 +52,29 @@ For requests coming from the Internet, there needs to be specified another confi
 You specify user credentials that will need to be passed on to the `X-Proxy-Authorization` header.
 
 You can also use a query parameter `host` for your requests to the proxy in order to resolve the destination server.
+
+- Another configuration file `config/limits.[dev|prod].json` is designed to set up limits on the incoming requests. Its responsibility is to make the server more secure once it's accessible in the global Internet:
+
+```json
+{
+    "windowMs": 900000,
+    "requestsPerWindow": 1,
+    "blocked": {
+        "statusCode": 403,
+        "message": {
+            "message": "Forbidden"
+        }
+    }
+}
+```
+
+`windowMs` - The time per which the limits on requests from the Internet counts
+
+`requestsPerWindow` - The number of requests from the Internet per specified window (`windowMs`)
+
+`blocked.statusCode` - The HTTP status code to return once the `requestsPerWindow` limit is hit
+
+`blocked.message` - The message to be returned in the HTTP response body once the `requestsPerWindow` limit is hit
 
 ## ❓ Questions
 
