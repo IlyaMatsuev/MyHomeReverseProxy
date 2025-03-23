@@ -2,20 +2,17 @@ const express = require('express');
 const https = require('https');
 const cors = require('cors');
 const bodyParser = require('body-parser');
-const fs = require('fs');
 const { rateLimit } = require('express-rate-limit');
+const { getSSLOptions } = require('./ssl');
 const { httpRequest } = require('./request');
 const { authorized, fromLocalNetwork } = require('./auth');
 const { log } = require('./logger');
 
-const PORT = process.env.PORT || 443;
+const PORT = 443;
+const PORT_HTTP = 80;
 const ENV = process.env.NODE_ENV || 'dev';
 const addresses = require(`../config/addresses.${ENV}.json`) || {};
 const limits = require(`../config/limits.${ENV}.json`) || {};
-const sslOptions = {
-    key: fs.readFileSync(`./ssl/key.pem`),
-    cert: fs.readFileSync(`./ssl/fullchain.pem`),
-};
 
 const limiter = rateLimit({
     windowMs: limits.windowMs,
@@ -76,4 +73,10 @@ server.use((request, response) => {
         });
 });
 
-https.createServer(sslOptions, server).listen(PORT, '0.0.0.0', () => console.info(log(`Listening on port ${PORT}`)));
+const sslOptions = getSSLOptions();
+if (sslOptions) {
+    https.createServer(sslOptions, server).listen(PORT, '0.0.0.0', () => console.info(log(`Listening on port ${PORT}`)));
+} else {
+    console.warn(log('Running HTTP server since no SSL certificate has been provided'));
+    server.listen(PORT_HTTP, '0.0.0.0', () => console.info(log(`Listening on port ${PORT_HTTP}`)));
+}
