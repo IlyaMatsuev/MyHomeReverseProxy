@@ -25,6 +25,9 @@ target/
 # Logs
 *.log
 
+# SSL
+ssl/**
+
 # Others
 **/tsconfig*.json
 **/*.tsbuildinfo

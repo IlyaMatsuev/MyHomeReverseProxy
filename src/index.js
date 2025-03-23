@@ -13,8 +13,8 @@ const ENV = process.env.NODE_ENV || 'dev';
 const addresses = require(`../config/addresses.${ENV}.json`) || {};
 const limits = require(`../config/limits.${ENV}.json`) || {};
 const sslOptions = {
-    key: fs.readFileSync(`/etc/ssl/imhouse/key.pem`),
-    cert: fs.readFileSync(`/etc/ssl/imhouse/fullchain.pem`),
+    key: fs.readFileSync(`./ssl/key.pem`),
+    cert: fs.readFileSync(`./ssl/fullchain.pem`),
 };
 
 const limiter = rateLimit({

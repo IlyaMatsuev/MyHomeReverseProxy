@@ -11,6 +11,6 @@ services:
       - "443"
     volumes:
       - ./config:/app/config
-      - /etc/ssl/imhouse:/etc/ssl/imhouse
+      - ./ssl:/app/ssl
     environment:
       - NODE_ENV=prod
