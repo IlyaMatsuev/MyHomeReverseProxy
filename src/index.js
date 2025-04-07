@@ -37,7 +37,7 @@ server.use(bodyParser.json());
 server.use(limiter);
 
 server.use((request, response) => {
-    const host = request.query.host || request.get('host');
+    const host = request.query.host || request.get('x-host');
     const clientAddress = request.ip;
     log(`Received request on "${host}" from "${clientAddress}"`);
 
