@@ -22,7 +22,7 @@ To run the server via the docker image (uses `NODE_ENV=prod`):
 npm run start:prod
 ```
 
-## 🛠️ Configuration
+## ⚙️ Configuration
 
 - The server is configurable via the `config/addresses.[dev|prod].json` file.
   The key is the domain name that needs to be resolved, the value is the object containing of the hostname and the port where the requests on that domain need to be forwarded to:
@@ -75,6 +75,22 @@ You can also use a query parameter `host` for your requests to the proxy in orde
 `blocked.statusCode` - The HTTP status code to return once the `requestsPerWindow` limit is hit
 
 `blocked.message` - The message to be returned in the HTTP response body once the `requestsPerWindow` limit is hit
+
+## 🛠️ Troubleshooting
+
+### Unreachable IP Address
+
+Sometimes, it can happen that you are not able to reach (or `ping`) the server's device by its IP even when it is in the same local network as your device.
+
+One of the reasons is the `Docker Desktop` app - it can alter the network settings and prevent you from reaching other devices in your local network. Try to exit the app and ping the server again.
+
+### DNS Resolution Issues
+
+In scenarios where you can reach the server device but the DNS is still not resolving the hostname you are using, try flushing the DNS cache on your device:
+
+```bash
+sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder
+```
 
 ## ❓ Questions
 
