@@ -59,6 +59,7 @@ You can also use a query parameter `host` for your requests to the proxy in orde
 {
     "windowMs": 900000,
     "requestsPerWindow": 1,
+    "skipSuccessful": false,
     "blocked": {
         "statusCode": 403,
         "message": {
@@ -71,6 +72,8 @@ You can also use a query parameter `host` for your requests to the proxy in orde
 `windowMs` - The time per which the limits on requests from the Internet counts
 
 `requestsPerWindow` - The number of requests from the Internet per specified window (`windowMs`)
+
+`skipSuccessful` - If `true`, successful requests (`status code < 400`) are not counted against the limit
 
 `blocked.statusCode` - The HTTP status code to return once the `requestsPerWindow` limit is hit
 
@@ -90,6 +93,14 @@ In scenarios where you can reach the server device but the DNS is still not reso
 
 ```bash
 sudo dscacheutil -flushcache; sudo killall -HUP mDNSResponder
+```
+
+### mDNS Resolution Issues
+
+If there are any issues related to not receiving packets via mDNS, the first thing to try is to restart the mDNS service:
+
+```bash
+sudo systemctl restart avahi-daemon
 ```
 
 ## ❓ Questions
