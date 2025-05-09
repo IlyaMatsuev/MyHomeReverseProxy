@@ -21,6 +21,7 @@ const limiter = rateLimit({
     legacyHeaders: false,
     statusCode: limits.blocked.statusCode,
     message: limits.blocked.message,
+    skipSuccessfulRequests: limits.skipSuccessful,
     skip: request => {
         const local = fromLocalNetwork(request.ip);
         if (local) {

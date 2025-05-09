@@ -1,6 +1,7 @@
 {
   "windowMs": 900000,
   "requestsPerWindow": 1,
+  "skipSuccessful": false,
   "blocked": {
     "statusCode": 403,
     "message": {
