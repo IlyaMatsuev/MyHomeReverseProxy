@@ -30,17 +30,32 @@ export DuckDNS_Token="TOKEN"
 
 After the successful challenge, the certificate files are stored in `~/.acme.sh/domain.duckdns.org_ecc/`
 
-4. Copy the `.key` and `fullchain.cer` files to the project `ssl/` folder. Both of these files need to be renamed to have `.pem` extension (to avoid compatibility issues)
+4. Install the certificate to copy the key into the project `ssl/` folder
+
+```sh
+~/.acme.sh/acme.sh --install-cert -d domain.duckdns.org \
+--ecc \
+--key-file /path-to-project/ssl/key.pem \
+--fullchain-file /path-to-project/ssl/fullchain.pem
+```
 
 ## Renewing the certificate
 
 1. Renew the certificate manually (`acme.sh` handles renewal automatically every **60 days**, but you can force it if needed)
 
 ```sh
-~/.acme.sh/acme.sh --renew -d domain.duckdns.org --ecc
+~/.acme.sh/acme.sh --renew -d domain.duckdns.org --ecc --dns dns_duckdns --dnssleep 60
 ```
 
-2. Copy/Update the `.key` and `fullchain.cer` files to the project `ssl/` folder. Both of these files need to be renamed to have `.pem` extension (to avoid compatibility issues)
+2. Install the certificate into `acme.sh` and copy the key into the project `ssl/` folder
+
+```sh
+~/.acme.sh/acme.sh --install-cert -d domain.duckdns.org \
+--ecc \
+--key-file /path-to-project/ssl/key.pem \
+--fullchain-file /path-to-project/ssl/fullchain.pem \
+--reloadcmd "docker restart reverse-proxy"
+```
 
 ## Tips
 
