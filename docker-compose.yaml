@@ -2,18 +2,12 @@ services:
   reverse-proxy:
     image: ilyamatsuev/reverse-proxy
     container_name: reverse-proxy
-    network_mode: host
     build: .
     restart: always
     tty: true
-    ports:
-      - "80:80"
-      - "443:443"
-    expose:
-      - "80"
-      - "443"
     volumes:
       - ./config:/app/config
       - ./ssl:/app/ssl
     environment:
       - NODE_ENV=prod
+    network_mode: host

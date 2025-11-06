@@ -28,11 +28,9 @@ const limiter = rateLimit({
     },
 });
 
-const server = express();
-
-server.use(limiter);
-
-server.use((request, response, next) => {
+const httpsServer = express();
+httpsServer.use(limiter);
+httpsServer.use((request, response, next) => {
     if (!authorized(request)) {
         warn(`The incoming request from "${request.ip}" was not authorized`);
         response.status(403).json({ message: 'Forbidden' });
@@ -46,10 +44,17 @@ server.use((request, response, next) => {
     });
 });
 
+const httpServer = express();
+httpServer.use((request, response, next) => {
+    const host = request.get('x-host') || request.get('host');
+    response.redirect(301, `https://${host}${request.url}`);
+});
+
 const sslOptions = getSSLOptions();
 if (sslOptions) {
-    https.createServer(sslOptions, server).listen(PORT, '0.0.0.0', () => log(`Listening on port ${PORT}`, true));
+    https.createServer(sslOptions, httpsServer).listen(PORT, '0.0.0.0', () => log(`Listening on port ${PORT}`, true));
+    httpServer.listen(PORT_HTTP, '0.0.0.0', () => log(`Listening on port ${PORT_HTTP}`, true));
 } else {
     warn('Running HTTP server since no SSL certificate has been provided');
-    server.listen(PORT_HTTP, '0.0.0.0', () => log(`Listening on port ${PORT_HTTP}`, true));
+    httpsServer.listen(PORT_HTTP, '0.0.0.0', () => log(`Listening on port ${PORT_HTTP}`, true));
 }
