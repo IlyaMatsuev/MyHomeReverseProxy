@@ -9,5 +9,7 @@ services:
       - ./config:/app/config
       - ./ssl:/app/ssl
     environment:
+      - PORT_HTTP=80
+      - PORT_HTTPS=443
       - NODE_ENV=prod
     network_mode: host
