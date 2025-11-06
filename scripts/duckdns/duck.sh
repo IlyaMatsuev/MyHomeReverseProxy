@@ -19,4 +19,4 @@ if [ -z "$DUCK_DNS_TOKEN" ] || [ -z "$LOG_FILE_PATH" ]; then
   exit 1
 fi
 
-echo 'url="https://www.duckdns.org/update?domains=imhouse&token=${DUCK_DNS_TOKEN}&ip="' | curl -k -o "$LOG_FILE_PATH" -K -
+echo url="https://www.duckdns.org/update?domains=imhouse&token=$DUCK_DNS_TOKEN&ip=" | curl -k -o "$LOG_FILE_PATH" -K -
