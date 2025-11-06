@@ -8,11 +8,10 @@ const addresses = require(`../config/addresses.${ENV}.json`) || {};
 const proxyMiddleware = createProxyMiddleware({
     changeOrigin: false,
     ws: true,
-    router: Object.keys(addresses).reduce((hostnames, service) => {
-        const { protocol, hostname, port } = addresses[service];
-        hostnames[service] = `${protocol || DEFAULT_PROTOCOL}://${hostname}:${port}`;
-        return hostnames;
-    }, {}),
+    router: request => {
+        const { protocol, hostname, port } = addresses[getHost(request)];
+        return `${protocol || DEFAULT_PROTOCOL}://${hostname}:${port}`;
+    },
 });
 
 /**
@@ -23,7 +22,7 @@ const proxyMiddleware = createProxyMiddleware({
  * @return {Promise<void>}
  */
 exports.proxyRequest = async function (request, response, next) {
-    const host = request.get('x-host') || request.get('host');
+    const host = getHost(request);
     log(`Received request on "${host}" from "${request.ip}"`, true);
 
     const targetAddress = addresses[host];
@@ -33,5 +32,10 @@ exports.proxyRequest = async function (request, response, next) {
     }
     log(`Resolved address: ${targetAddress.hostname}:${targetAddress.port}${request.url}`);
 
+    request.headers.host = host;
     return proxyMiddleware(request, response, next);
 };
+
+function getHost(request) {
+    return request.get('x-host') || request.get('host');
+}
