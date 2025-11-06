@@ -6,7 +6,7 @@ const ENV = process.env.NODE_ENV || 'dev';
 const addresses = require(`../config/addresses.${ENV}.json`) || {};
 
 const proxyMiddleware = createProxyMiddleware({
-    changeOrigin: true,
+    changeOrigin: false,
     ws: true,
     router: Object.keys(addresses).reduce((hostnames, service) => {
         const { protocol, hostname, port } = addresses[service];
