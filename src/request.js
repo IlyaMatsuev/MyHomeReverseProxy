@@ -1,54 +1,37 @@
-const http = require('http');
+const { createProxyMiddleware } = require('http-proxy-middleware');
+const { log, warn } = require('./logger');
 
-const METHODS_WITH_BODY = ['POST', 'PUT', 'PATCH'];
+const DEFAULT_PROTOCOL = 'http';
+const ENV = process.env.NODE_ENV || 'dev';
+const addresses = require(`../config/addresses.${ENV}.json`) || {};
+
+const proxyMiddleware = createProxyMiddleware({
+    changeOrigin: true,
+    ws: true,
+    router: Object.keys(addresses).reduce((hostnames, service) => {
+        const { protocol, hostname, port } = addresses[service];
+        hostnames[service] = `${protocol || DEFAULT_PROTOCOL}://${hostname}:${port}`;
+        return hostnames;
+    }, {}),
+});
 
 /**
- * Sends HTTP request
- * @param options {{
- *     hostname: string,
- *     port: number,
- *     uri: string,
- *     method: string,
- *     headers: Record<string, string>,
- *     data: any
- * }} Configuration for the HTTP request
- * @return {Promise<IncomingMessage & { data: string }>}
+ * Forwards the HTTP request to the destination, using mappings from the config/addresses.{dev/prod}.json
+ * @param request HTTP request
+ * @param response HTTP response
+ * @param next Express callback function
+ * @return {Promise<void>}
  */
-exports.httpRequest = function (options) {
-    const requestData = getNormalizedData(options);
-    const requestOptions = {
-        hostname: options.hostname,
-        port: options.port,
-        path: options.uri,
-        method: options.method,
-        headers: getNormalizedHeaders(options.method, options.headers, requestData),
-    };
+exports.proxyRequest = async function (request, response, next) {
+    const host = request.get('x-host') || request.get('host');
+    log(`Received request on "${host}" from "${request.ip}"`, true);
 
-    return new Promise((resolve, reject) => {
-        const request = http.request(requestOptions, response => {
-            let data = '';
-            response.on('data', chunk => data += chunk);
-            response.on('end', () => resolve({ ...response, headers: response.headers, data }));
-        });
-        request.on('error', error => reject(error));
-
-        if (requestData && METHODS_WITH_BODY.includes(options.method)) {
-            request.write(requestData);
-        }
-        request.end();
-    });
-};
-
-function getNormalizedData(options) {
-    const data = typeof options.data === 'string' ? options.data : JSON.stringify(options.data);
-    return data === '{}' ? undefined : data;
-}
-
-function getNormalizedHeaders(method, headers, data) {
-    delete headers['Content-Length'];
-    delete headers['content-length'];
-    if (data && METHODS_WITH_BODY.includes(method)) {
-        headers['Content-Length'] = Buffer.byteLength(data);
+    const targetAddress = addresses[host];
+    if (!targetAddress) {
+        warn(`Could not resolve host: ${host}`);
+        return response.status(404).json({ message: 'Not Found' });
     }
-    return headers;
-}
+    log(`Resolved address: ${targetAddress.hostname}:${targetAddress.port}${request.url}`);
+
+    return proxyMiddleware(request, response, next);
+};
