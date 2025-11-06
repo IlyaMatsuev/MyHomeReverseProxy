@@ -6,10 +6,17 @@
 # chmod +x ./scripts/duckdns/duck.sh
 
 # Usage Example:
-# $ sudo ./scripts/duckdns/duck.sh
+# $ sudo ./scripts/duckdns/duck.sh $DuckDNSToken path/to/duck.log
 # To schedule:
 # $ sudo crontab -e
-# $ */5 * * * * path-to-scripts-dir/duckdns/duck.sh >/dev/null 2>&1
+# $ */5 * * * * path-to-scripts-dir/duckdns/duck.sh $DuckDNSToken path/to/duck.log >/dev/null 2>&1
 
-echo url="https://www.duckdns.org/update?domains=imhouse&token=b107eaa7-07a8-43a7-a0f0-c26a5f9cd0df&ip=" | curl -k -o /home/ilya/Desktop/projects/my-reverse-proxy/scripts/duckdns/duck.log -K -
+DUCK_DNS_TOKEN="$1"
+LOG_FILE_PATH="$2"
 
+if [ -z "$DUCK_DNS_TOKEN" ] || [ -z "$LOG_FILE_PATH" ]; then
+  echo "Usage: $0 <duck_dns_token> <log_file_path>"
+  exit 1
+fi
+
+echo 'url="https://www.duckdns.org/update?domains=imhouse&token=${DUCK_DNS_TOKEN}&ip="' | curl -k -o "$LOG_FILE_PATH" -K -

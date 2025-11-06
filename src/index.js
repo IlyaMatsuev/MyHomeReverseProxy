@@ -6,8 +6,8 @@ const { proxyRequest } = require('./request');
 const { authorized, fromLocalNetwork } = require('./auth');
 const { log, warn, error } = require('./logger');
 
-const PORT = 443;
-const PORT_HTTP = 80;
+const PORT = process.env.PORT_HTTPS || 443;
+const PORT_HTTP = process.env.PORT_HTTP || 80;
 const ENV = process.env.NODE_ENV || 'dev';
 const limits = require(`../config/limits.${ENV}.json`) || {};
 
