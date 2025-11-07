@@ -1,6 +1,7 @@
 {
   "localhost": {
-    "hostname": "192.168.178.234",
-    "port": 3010
+    "hostname": "192.168.0.1",
+    "port": 8000,
+    "startUrl": "/admin"
   }
 }

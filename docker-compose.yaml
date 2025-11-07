@@ -19,6 +19,11 @@ services:
     container_name: pihole
     restart: unless-stopped
     env_file: ./config/pihole/.env.pihole.prod
+    environment:
+      - WEB_PORT=8080
+      - WEB_PORT_HTTPS=8443
+      - DNSMASQ_LISTENING=all
+      - TZ=Europe/Amsterdam
     ports:
       - "53:53/tcp"
       - "53:53/udp"

@@ -2,16 +2,15 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const { log, warn } = require('./logger');
 
 const DEFAULT_PROTOCOL = 'http';
+const DEFAULT_HOSTNAME = '127.0.0.1';
+const DEFAULT_PORT = 80;
 const ENV = process.env.NODE_ENV || 'dev';
 const addresses = require(`../config/addresses.${ENV}.json`) || {};
 
 const proxyMiddleware = createProxyMiddleware({
     changeOrigin: false,
     ws: true,
-    router: request => {
-        const { protocol, hostname, port } = addresses[getHost(request)];
-        return `${protocol || DEFAULT_PROTOCOL}://${hostname}:${port}`;
-    },
+    router: request => getDestinationAddress(addresses[getHost(request)], request.url),
 });
 
 /**
@@ -30,7 +29,6 @@ exports.proxyRequest = async function (request, response, next) {
         warn(`Could not resolve host: ${host}`);
         return response.status(404).json({ message: 'Not Found' });
     }
-    log(`Resolved address: ${targetAddress.hostname}:${targetAddress.port}${request.url}`);
 
     request.headers.host = host;
     return proxyMiddleware(request, response, next);
@@ -38,4 +36,16 @@ exports.proxyRequest = async function (request, response, next) {
 
 function getHost(request) {
     return request.get('x-host') || request.get('host');
+}
+
+function getDestinationAddress(address, requestUrl) {
+    const addressParts = [
+        `${address.protocol || DEFAULT_PROTOCOL}://`,
+        `${address.hostname || DEFAULT_HOSTNAME}:`,
+        address.port || DEFAULT_PORT,
+        address.startUrl && requestUrl === '/' ? address.startUrl : '',
+    ];
+    const resolvedAddress = addressParts.join('');
+    log(`Resolved address: ${resolvedAddress}${requestUrl}`);
+    return resolvedAddress;
 }
