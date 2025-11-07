@@ -6,17 +6,20 @@
 # chmod +x ./scripts/duckdns/duck.sh
 
 # Usage Example:
-# $ sudo ./scripts/duckdns/duck.sh $DuckDNSToken path/to/duck.log
+# $ sudo ./scripts/duckdns/duck.sh $DuckDNSToken
 # To schedule:
 # $ sudo crontab -e
-# $ */5 * * * * path-to-scripts-dir/duckdns/duck.sh $DuckDNSToken path/to/duck.log >/dev/null 2>&1
+# $ */5 * * * * path-to-scripts-dir/duckdns/duck.sh $DuckDNSToken >/dev/null 2>&1
 
 DUCK_DNS_TOKEN="$1"
-LOG_FILE_PATH="$2"
 
-if [ -z "$DUCK_DNS_TOKEN" ] || [ -z "$LOG_FILE_PATH" ]; then
-  echo "Usage: $0 <duck_dns_token> <log_file_path>"
+if [ -z "$DUCK_DNS_TOKEN" ]; then
+  echo "Usage: $0 <duck_dns_token>"
   exit 1
 fi
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+LOG_FILE_PATH="$SCRIPT_DIR/duck.log"
+
 
 echo url="https://www.duckdns.org/update?domains=imhouse&token=$DUCK_DNS_TOKEN&ip=" | curl -k -o "$LOG_FILE_PATH" -K -

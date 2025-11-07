@@ -42,7 +42,12 @@ target/
 **/.github/
 **/.gitignore
 
+# Configs
+config/
+
 # Other
+scripts/
+ssl/
 **/Procfile
 **/LICENSE
 **/README.md

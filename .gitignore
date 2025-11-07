@@ -29,7 +29,12 @@ target/
 ssl/**
 !ssl/README.md
 
+# Configs
+config/**/.env.*.prod
+config/pihole/data/*
+config/pihole/dnsmasq.d/*
+**/*.prod.json
+
 # Others
 **/tsconfig*.json
 **/*.tsbuildinfo
-**/*.prod.json

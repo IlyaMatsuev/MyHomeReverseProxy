@@ -12,7 +12,8 @@
     "eslint:verify": "eslint --quiet",
     "build:image": "docker compose build reverse-proxy",
     "start": "node src/index.js",
-    "start:prod": "docker compose up reverse-proxy"
+    "start:prod": "docker compose up reverse-proxy -d",
+    "pihole:start:prod": "docker compose up pihole -d"
   },
   "author": {
     "name": "Ilya Matsuev",

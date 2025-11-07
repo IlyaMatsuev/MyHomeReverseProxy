@@ -4,7 +4,8 @@ This guide explains how to generate and renew an SSL certificate for the reverse
 
 ## Prerequisites
 
-- You need to have a registered domain name. I'm using [DuckDNS](https://www.duckdns.org/) for that
+- You need to have a registered domain name
+    - I'm using [DuckDNS](https://www.duckdns.org/) for that. The script for setting up automatic global IP update is located [here](./../scripts/duckdns/duck.sh)
 - All `domain.duckdns.org` references in the following instructions need to be replaced with an actual registered domain name (e.g. `ilya.duckdns.org`)
 
 ## Generating a certificate
