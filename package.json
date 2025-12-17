@@ -13,6 +13,7 @@
     "build:image": "docker compose build reverse-proxy",
     "start": "node src/index.js",
     "start:prod": "docker compose up reverse-proxy -d",
+    "restart:prod": "docker compose up reverse-proxy -d --force-recreate",
     "pihole:start:prod": "docker compose up pihole -d",
     "pihole:restart:prod": "docker compose up -d --force-recreate"
   },

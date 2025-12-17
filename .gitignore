@@ -38,3 +38,4 @@ config/pihole/dnsmasq.d/*
 # Others
 **/tsconfig*.json
 **/*.tsbuildinfo
+**/graphql.config.yml

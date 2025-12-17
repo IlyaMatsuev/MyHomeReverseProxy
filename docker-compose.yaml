@@ -12,6 +12,8 @@ services:
       - PORT_HTTP=80
       - PORT_HTTPS=443
       - NODE_ENV=prod
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
     network_mode: host
 
   pihole:
