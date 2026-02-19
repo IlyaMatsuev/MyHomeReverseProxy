@@ -111,6 +111,10 @@ At this point your router should be able to always give the same static IP to yo
 
 ## 🛠️ Troubleshooting
 
+### 504 Gateway Timeout
+
+When receiving a similar error "Error occurred while trying to proxy", the first thing to check is whether the service you're trying to reach is up.
+
 ### Unreachable IP Address
 
 Sometimes, it can happen that you are not able to reach (or `ping`) the server's device by its IP even when it is in the same local network as your device.
