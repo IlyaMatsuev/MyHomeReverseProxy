@@ -43,7 +43,7 @@ npm run start:prod
 
 With this configuration, any request coming to `http://test.domain.home` will be forwarded to `http://111.222.333.4:8888` (if request comes from the local network).
 
-- For requests coming from the Internet, another config file `config/addresses.[dev|prod].json` needs to be specified:
+- For requests coming from the Internet, another config file `config/secrets.[dev|prod].json` needs to be specified:
 
 ```json
 {
