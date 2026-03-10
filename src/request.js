@@ -1,4 +1,5 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
+const { fromLocalNetwork } = require('./auth');
 const { log, warn } = require('./logger');
 
 const DEFAULT_PROTOCOL = 'http';
@@ -28,6 +29,11 @@ exports.proxyRequest = async function (request, response, next) {
     if (!targetAddress) {
         warn(`Could not resolve host: ${host}`);
         return response.status(404).json({ message: 'Not Found' });
+    }
+
+    if (targetAddress.localOnly && !fromLocalNetwork(request.ip)) {
+        warn(`Access denied to local-only address "${host}" from external IP "${request.ip}"`);
+        return response.status(403).json({ message: 'Forbidden' });
     }
 
     request.headers.host = host;
