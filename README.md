@@ -35,7 +35,7 @@ npm run start:prod
         // "localhost" by default
         hostname: '111.222.333.4',
         port: 8888,
-        // "" by default. Url where the request should be redirected to, when accessing root address (e.g. "https://service.home" to be redirected to "http://localhost:8000/login")
+        // "" by default. Url where the request should be redirected to, when accessing root address (e.g. "https://service.home" to be redirected to "http://localhost:8080/login")
         startUrl: '',
         // false by default. If true, the address is only accessible from the local network
         localOnly: true,

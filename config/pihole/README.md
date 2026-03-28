@@ -27,7 +27,7 @@ This way, running the pihole service as a docker container will preserve the old
 
 1. Start the pihole service: `npm run pihole:start:prod`
 2. Wait a minute, the service needs some time to start up. The logs can be checked with `docker logs -f pihole`
-3. Go to the web interface: `http://{server-ip}:8000/admin`
+3. Go to the web interface: `http://{server-ip}:8080/admin`
 
 - Configure DNS settings: `Settings` -> `DNS` -> `Toggle Advanced mode at the top right` -> `Make sure "Interface settings" is set to "Permit all origins"`
 - _[Optional]_ Configure Ad lists. Ad lists can be found online and imported via the `Lists` tab.
