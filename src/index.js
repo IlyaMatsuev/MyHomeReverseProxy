@@ -10,16 +10,9 @@ const { log, warn, error } = require('./logger');
 const PORT = process.env.PORT_HTTPS || 443;
 const PORT_HTTP = process.env.PORT_HTTP || 80;
 
-async function startServer() {
-    if (!(await loadConfig())) {
-        error('Failed to load config. Exiting...');
-        process.exit(1);
-    }
-
-    watchConfig();
-
+function createRateLimiter() {
     const limits = getLimits();
-    const limiter = rateLimit({
+    return rateLimit({
         windowMs: limits.windowMs,
         limit: limits.requestsPerWindow,
         standardHeaders: false,
@@ -35,6 +28,17 @@ async function startServer() {
             return local;
         },
     });
+}
+
+async function main() {
+    if (!(await loadConfig())) {
+        error('Failed to load config. Exiting...');
+        process.exit(1);
+    }
+
+    watchConfig();
+
+    const limiter = createRateLimiter();
 
     const httpsServer = express();
     httpsServer.use(limiter);
@@ -68,4 +72,4 @@ async function startServer() {
     }
 }
 
-startServer();
+main();
