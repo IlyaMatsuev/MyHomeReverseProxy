@@ -1,4 +1,5 @@
 const fs = require('fs');
+const fsPromises = require('fs/promises');
 const path = require('path');
 const yaml = require('js-yaml');
 const { log, warn, error } = require('./logger');
@@ -10,9 +11,9 @@ let config = {};
 let watchDebounceTimer = null;
 const DEBOUNCE_MS = 100;
 
-function loadConfig() {
+async function loadConfig() {
     try {
-        const fileContents = fs.readFileSync(CONFIG_FILE_PATH, 'utf8');
+        const fileContents = await fsPromises.readFile(CONFIG_FILE_PATH, 'utf8');
         const newConfig = yaml.load(fileContents);
         config = newConfig || {};
         log(`Config loaded from ${CONFIG_FILE_PATH}`, true);
@@ -25,21 +26,22 @@ function loadConfig() {
 
 function watchConfig() {
     try {
-        fs.watch(CONFIG_FILE_PATH, eventType => {
-            if (eventType === 'change') {
-                if (watchDebounceTimer) {
-                    clearTimeout(watchDebounceTimer);
-                }
-                watchDebounceTimer = setTimeout(() => {
-                    log('Config file changed, reloading...', true);
-                    const prevLimits = JSON.stringify(config.limits);
-                    if (loadConfig()) {
-                        if (JSON.stringify(config.limits) !== prevLimits) {
-                            warn('Rate limiter config changed. Server restart required for changes to take effect.');
-                        }
-                    }
-                }, DEBOUNCE_MS);
+        fs.watch(CONFIG_FILE_PATH, async eventType => {
+            if (eventType !== 'change') {
+                return;
             }
+            if (watchDebounceTimer) {
+                clearTimeout(watchDebounceTimer);
+            }
+            watchDebounceTimer = setTimeout(async () => {
+                log('Config file changed, reloading...', true);
+                const prevLimits = JSON.stringify(config.limits);
+                if (await loadConfig()) {
+                    if (JSON.stringify(config.limits) !== prevLimits) {
+                        warn('Rate limiter config changed. Server restart required for changes to take effect.');
+                    }
+                }
+            }, DEBOUNCE_MS);
         });
         log('Watching config file for changes', true);
     } catch (e) {
@@ -47,10 +49,9 @@ function watchConfig() {
     }
 }
 
-loadConfig();
-watchConfig();
-
 module.exports = {
+    loadConfig,
+    watchConfig,
     getAddresses: () => config.addresses || {},
     getSecrets: () => config.secrets || {},
     getLimits: () => config.limits || {},
