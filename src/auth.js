@@ -1,7 +1,5 @@
 const { scryptSync, timingSafeEqual } = require('crypto');
-
-const ENV = process.env.NODE_ENV || 'dev';
-const secrets = require(`../config/secrets.${ENV}.json`) || {};
+const { getSecrets } = require('./config');
 
 const AUTH_HEADER_NAME = 'X-Proxy-Authorization';
 
@@ -18,6 +16,7 @@ exports.authorized = function (request) {
     if (!authHeader) {
         return false;
     }
+    const secrets = getSecrets();
     const [username, password, secret] = Buffer.from(authHeader, 'base64').toString().split(':');
     return username === secrets.username && compareCredential(secrets.password, password) && compareCredential(secrets.secret, secret);
 };
@@ -28,6 +27,7 @@ exports.authorized = function (request) {
  * @return {boolean}
  */
 exports.fromLocalNetwork = function (remoteAddress) {
+    const secrets = getSecrets();
     return new RegExp(secrets.localAddressPattern, 'g').test(remoteAddress);
 };
 

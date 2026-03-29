@@ -1,17 +1,16 @@
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const { fromLocalNetwork } = require('./auth');
+const { getAddresses } = require('./config');
 const { log, warn } = require('./logger');
 
 const DEFAULT_PROTOCOL = 'http';
 const DEFAULT_HOSTNAME = '127.0.0.1';
 const DEFAULT_PORT = 80;
-const ENV = process.env.NODE_ENV || 'dev';
-const addresses = require(`../config/addresses.${ENV}.json`) || {};
 
 const proxyMiddleware = createProxyMiddleware({
     changeOrigin: false,
     ws: true,
-    router: request => getDestinationAddress(addresses[getHost(request)], request.url),
+    router: request => getDestinationAddress(getAddresses()[getHost(request)], request.url),
     onError: (err, request, response) => {
         const host = getHost(request);
         warn(`Service "${host}" is not available: ${err.message}`);
@@ -30,6 +29,7 @@ exports.proxyRequest = async function (request, response, next) {
     const host = getHost(request);
     log(`Received request on "${host}" from "${request.ip}"`, true);
 
+    const addresses = getAddresses();
     const targetAddress = addresses[host];
     if (!targetAddress) {
         warn(`Could not resolve host: ${host}`);

@@ -4,12 +4,12 @@ const { rateLimit } = require('express-rate-limit');
 const { getSSLOptions } = require('./ssl');
 const { proxyRequest } = require('./request');
 const { authorized, fromLocalNetwork } = require('./auth');
+const { getLimits } = require('./config');
 const { log, warn, error } = require('./logger');
 
 const PORT = process.env.PORT_HTTPS || 443;
 const PORT_HTTP = process.env.PORT_HTTP || 80;
-const ENV = process.env.NODE_ENV || 'dev';
-const limits = require(`../config/limits.${ENV}.json`) || {};
+const limits = getLimits();
 
 const limiter = rateLimit({
     windowMs: limits.windowMs,
