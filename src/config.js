@@ -1,4 +1,3 @@
-const fs = require('fs');
 const fsPromises = require('fs/promises');
 const path = require('path');
 const yaml = require('js-yaml');
@@ -24,11 +23,13 @@ async function loadConfig() {
     }
 }
 
-function watchConfig() {
+async function watchConfig() {
     try {
-        fs.watch(CONFIG_FILE_PATH, async eventType => {
-            if (eventType !== 'change') {
-                return;
+        const watcher = fsPromises.watch(CONFIG_FILE_PATH);
+        log('Watching config file for changes', true);
+        for await (const event of watcher) {
+            if (event.eventType !== 'change') {
+                continue;
             }
             if (watchDebounceTimer) {
                 clearTimeout(watchDebounceTimer);
@@ -42,8 +43,7 @@ function watchConfig() {
                     }
                 }
             }, DEBOUNCE_MS);
-        });
-        log('Watching config file for changes', true);
+        }
     } catch (e) {
         error(`Failed to watch config file: ${e.message}`);
     }
