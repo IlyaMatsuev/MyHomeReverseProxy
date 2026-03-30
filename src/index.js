@@ -59,6 +59,7 @@ async function main() {
     const httpServer = express();
     httpServer.use((request, response, next) => {
         const host = request.get('x-host') || request.get('host');
+        // TODO: This is an open-redirect vulnerability
         response.redirect(301, `https://${host}${request.url}`);
     });
 
