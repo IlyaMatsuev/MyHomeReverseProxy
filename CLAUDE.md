@@ -13,14 +13,17 @@ A Node.js reverse proxy server that forwards requests for domains with the same 
 - **index.js** - Main entry point. Sets up Express HTTPS/HTTP servers with rate limiting and authorization middleware
 - **request.js** - Request routing logic. Maps incoming hostnames to target addresses using config files
 - **auth.js** - Authentication module. Provides `authorized()` for request auth and `fromLocalNetwork()` for IP checks
+- **config.js** - Configuration module. Loads YAML config, provides getters, and watches for file changes
 - **logger.js** - Colored console logging with timestamps
 - **ssl.js** - SSL certificate loading
 
 ### Configuration Files (`config/`)
 
-All config files have `.dev.json` and `.prod.json` variants based on `NODE_ENV`:
+Configuration is stored in a single YAML file per environment: `config.dev.yaml` or `config.prod.yaml` (based on `NODE_ENV`).
 
-- **addresses.{env}.json** - Hostname to backend mapping
+The config file contains three sections:
+
+- **addresses** - Hostname to backend mapping (keyed by hostname)
 
     - `protocol` - Target protocol (default: "http")
     - `hostname` - Target IP/hostname (default: "127.0.0.1")
@@ -28,19 +31,27 @@ All config files have `.dev.json` and `.prod.json` variants based on `NODE_ENV`:
     - `startUrl` - Redirect path for root requests
     - `localOnly` - If true, only accessible from local network
 
-- **secrets.{env}.json** - Auth credentials and local network pattern
+- **secrets** - Auth credentials and local network pattern
 
     - `username`, `password`, `secret` - Credentials for external access
     - `localAddressPattern` - Regex to identify local IPs
 
-- **limits.{env}.json** - Rate limiting configuration
+- **limits** - Rate limiting configuration
+
+    - `windowMs` - Time window in milliseconds
+    - `requestsPerWindow` - Max requests per window
+    - `skipSuccessful` - Skip successful requests from count
+    - `blocked.statusCode` - HTTP status for blocked requests
+    - `blocked.message` - Response body for blocked requests
 
 ## Key Patterns
 
 - Environment detection via `NODE_ENV` (defaults to "dev")
 - Local network requests bypass rate limiting and auth
 - External requests require `X-Proxy-Authorization` header with base64-encoded credentials
-- Config files are loaded at startup, not dynamically
+- Config file is watched for changes and reloaded automatically
+- Address and secret changes take effect immediately without restart
+- Rate limiter changes require server restart (warning is logged when detected)
 
 ## Commands
 

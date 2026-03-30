@@ -1,0 +1,21 @@
+addresses:
+  localhost:
+    hostname: "192.168.0.1"
+    port: 8080
+    startUrl: "/admin"
+    localOnly: true
+
+secrets:
+  username: "root"
+  password: "49031abf8bd5a5076545358adc78928c85c711caeb2f3c95be4b2cce15ac8ed51309df0c4d1dae80a308ff494ec18aecfb4f4305330f3a9a47c4a2f8bd4db3db.ead0c1eb224d06b213b901b22927212b"
+  secret: "5a2de1adb235552ffec2c96dc18aa18b906ee62927b17881f07be9d13297d290ab3bae3385c057e8b5efd8535628b4d50d862c3d8584366f62ff53eb1fa3b385.5adde6de6d8f7e1428214bb35fbd070d"
+  localAddressPattern: '^127\.0\.0\.1$'
+
+limits:
+  windowMs: 900000
+  requestsPerWindow: 1
+  skipSuccessful: false
+  blocked:
+    statusCode: 403
+    message:
+      message: "Forbidden"

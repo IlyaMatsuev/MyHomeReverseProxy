@@ -33,7 +33,7 @@ ssl/**
 config/**/.env.*.prod
 config/pihole/data/*
 config/pihole/dnsmasq.d/*
-**/*.prod.json
+config/config.prod.yaml
 
 # Others
 **/tsconfig*.json
