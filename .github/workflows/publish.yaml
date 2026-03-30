@@ -1,9 +1,5 @@
 name: Publish Package
 
-env:
-  REGISTRY: docker.io
-  DOCKER_IMAGE_NAME: reverse-proxy
-
 on:
   workflow_dispatch:
   push:
@@ -12,6 +8,10 @@ on:
     paths:
       - "src/**"
       - "Dockerfile"
+
+env:
+  DOCKER_REGISTRY: docker.io
+  DOCKER_IMAGE_NAME: reverse-proxy
 
 # Secrets required for this action:
 # 1. DOCKER_USERNAME - username of the docker account
@@ -42,8 +42,9 @@ jobs:
         with:
           context: ./
           platforms: linux/amd64
-          outputs: type=image,name=${{ env.REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha,scope=amd64
+          outputs: type=image,name=${{ env.DOCKER_REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=linux/amd64
+          cache-to: type=gha,mode=max,scope=linux/amd64
 
   build-arm64:
     name: "Build linux/arm64"
@@ -69,8 +70,9 @@ jobs:
         with:
           context: ./
           platforms: linux/arm64
-          outputs: type=image,name=${{ env.REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
-          cache-from: type=gha,scope=arm64
+          outputs: type=image,name=${{ env.DOCKER_REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=linux/arm64
+          cache-to: type=gha,mode=max,scope=linux/arm64
 
   publish-image:
     name: "Publish multi-arch image"
@@ -88,6 +90,6 @@ jobs:
 
       - name: "Create and push manifest"
         run: |
-          docker buildx imagetools create -t ${{ secrets.DOCKER_USERNAME }}/reverse-proxy:latest \
-            ${{ secrets.DOCKER_USERNAME }}/reverse-proxy@${{ needs.build-amd64.outputs.digest }} \
-            ${{ secrets.DOCKER_USERNAME }}/reverse-proxy@${{ needs.build-arm64.outputs.digest }}
+          docker buildx imagetools create -t ${{ env.DOCKER_REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}:latest \
+            ${{ env.DOCKER_REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}@${{ needs.build-amd64.outputs.digest }} \
+            ${{ env.DOCKER_REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }}@${{ needs.build-arm64.outputs.digest }}
