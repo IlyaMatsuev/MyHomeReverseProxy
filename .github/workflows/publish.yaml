@@ -1,5 +1,9 @@
 name: Publish Package
 
+env:
+  REGISTRY: docker.io
+  DOCKER_IMAGE_NAME: reverse-proxy
+
 on:
   workflow_dispatch:
   push:
@@ -15,7 +19,7 @@ on:
 
 jobs:
   build-amd64:
-    name: "Build AMD64 image"
+    name: "Build linux/amd64"
     runs-on: ubuntu-latest
     outputs:
       digest: ${{ steps.build.outputs.digest }}
@@ -32,19 +36,18 @@ jobs:
       - name: "Set up Docker Buildx"
         uses: docker/setup-buildx-action@v3
 
-      - name: "Build and push the image"
+      - name: "Build and push AMD64 image"
         id: build
         uses: docker/build-push-action@v6
         with:
+          context: ./
           platforms: linux/amd64
-          push: true
-          tags: "${{ secrets.DOCKER_USERNAME }}/reverse-proxy:amd64"
+          outputs: type=image,name=${{ env.REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
           cache-from: type=gha,scope=amd64
-          cache-to: type=gha,mode=max,scope=amd64
 
   build-arm64:
-    name: "Build ARM64 image"
-    runs-on: ubuntu-latest
+    name: "Build linux/arm64"
+    runs-on: ubuntu-24.04-arm
     outputs:
       digest: ${{ steps.build.outputs.digest }}
     steps:
@@ -60,18 +63,17 @@ jobs:
       - name: "Set up Docker Buildx"
         uses: docker/setup-buildx-action@v3
 
-      - name: "Build and push the image"
+      - name: "Build and push ARM64 image"
         id: build
         uses: docker/build-push-action@v6
         with:
-          platforms: linux/arm64/v8
-          push: true
-          tags: "${{ secrets.DOCKER_USERNAME }}/reverse-proxy:arm64"
+          context: ./
+          platforms: linux/arm64
+          outputs: type=image,name=${{ env.REGISTRY }}/${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGE_NAME }},push-by-digest=true,name-canonical=true,push=true
           cache-from: type=gha,scope=arm64
-          cache-to: type=gha,mode=max,scope=arm64
 
   publish-image:
-    name: "Publish the latest docker image version"
+    name: "Publish multi-arch image"
     runs-on: ubuntu-latest
     needs: [build-amd64, build-arm64]
     steps:
