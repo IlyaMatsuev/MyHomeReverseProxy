@@ -1,5 +1,7 @@
 # My Reverse Proxy
 
+[![Publish Package](https://github.com/IlyaMatsuev/MyReverseProxy/actions/workflows/publish.yaml/badge.svg)](https://github.com/IlyaMatsuev/MyReverseProxy/actions/workflows/publish.yaml)
+
 The project is a reverse proxy that is used mainly to forward requests for domains with the same IP address to the same machine but on different ports.
 
 This server is also designed to allow requests from the local network but require authorization when the request comes from the Internet.
