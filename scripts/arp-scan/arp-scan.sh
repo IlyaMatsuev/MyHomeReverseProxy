@@ -22,6 +22,16 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 LOG_FILE="$SCRIPT_DIR/${INTERFACE}-latest.log"
 
+SUBNET=$(ip -4 addr show "$INTERFACE" | grep -oP '(?<=inet\s)\d+\.\d+\.\d+')
+
+if [ -n "$SUBNET" ]; then
+    for i in $(seq 1 254); do
+        ping -c 1 -W 1 "$SUBNET.$i" &>/dev/null &
+    done
+    wait
+    sleep 2
+fi
+
 {
     echo "=== ARP Scan on ${INTERFACE} ==="
     echo "Date: $(date)"
