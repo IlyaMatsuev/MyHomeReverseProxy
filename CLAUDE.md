@@ -34,7 +34,7 @@ The config file contains three sections:
 - **secrets** - Auth credentials and local network pattern
 
     - `username`, `password`, `secret` - Credentials for external access
-    - `localAddressPattern` - Regex to identify local IPs
+    - `localAddressPattern` - Regex to identify local IPs (use YAML single-quoted strings to avoid backslash escape errors)
 
 - **limits** - Rate limiting configuration
 
@@ -48,7 +48,7 @@ The config file contains three sections:
 
 - Environment detection via `NODE_ENV` (defaults to "dev")
 - Local network requests bypass rate limiting and auth
-- External requests require `X-Proxy-Authorization` header with base64-encoded credentials
+- External requests require `X-Proxy-Authorization` header with base64-encoded credentials; alternatively, a `host` query parameter can specify the destination hostname
 - Config file is watched for changes and reloaded automatically
 - Address and secret changes take effect immediately without restart
 - Rate limiter changes require server restart (warning is logged when detected)
