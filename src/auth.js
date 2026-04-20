@@ -4,7 +4,7 @@ const { getSecrets } = require('./config');
 const AUTH_HEADER_NAME = 'X-Proxy-Authorization';
 
 // Cached local address regex - invalidates when pattern changes
-let localAddressCache = { pattern: null, regex: null };
+let localAddressPattern = { pattern: null, regex: null };
 
 /**
  * Checks if the request is authorized to be forwarded via the proxy
@@ -32,10 +32,10 @@ exports.authorized = function (request) {
 exports.fromLocalNetwork = function (remoteAddress) {
     const secrets = getSecrets();
     const pattern = secrets.localAddressPattern;
-    if (localAddressCache.pattern !== pattern) {
-        localAddressCache = { pattern, regex: new RegExp(pattern) };
+    if (localAddressPattern.pattern !== pattern) {
+        localAddressPattern = { pattern, regex: new RegExp(pattern) };
     }
-    return localAddressCache.regex.test(remoteAddress);
+    return localAddressPattern.regex.test(remoteAddress);
 };
 
 function compareCredential(storedHash, credential) {
