@@ -9,6 +9,7 @@ services:
       - ./config:/app/config
       - ./ssl:/app/ssl
     environment:
+      - TZ=Europe/Amsterdam
       - PORT_HTTP=80
       - PORT_HTTPS=443
       - NODE_ENV=prod
