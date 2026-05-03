@@ -33,7 +33,7 @@ The config file contains three sections:
 
 - **secrets** - Auth credentials and local network pattern
 
-    - `username`, `password`, `secret` - Credentials for external access
+    - `username`, `passwordHash`, `secretHash` - Credentials for external access (`passwordHash` and `secretHash` store scrypt `<hash>.<salt>` pairs; rotate via `scripts/rotate-credentials.js`)
     - `localAddressPattern` - Regex to identify local IPs (use YAML single-quoted strings to avoid backslash escape errors)
 
 - **limits** - Rate limiting configuration

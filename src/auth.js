@@ -21,7 +21,9 @@ exports.authorized = function (request) {
     }
     const secrets = getSecrets();
     const [username, password, secret] = Buffer.from(authHeader, 'base64').toString().split(':');
-    return username === secrets.username && compareCredential(secrets.password, password) && compareCredential(secrets.secret, secret);
+    return (
+        username === secrets.username && compareCredential(secrets.passwordHash, password) && compareCredential(secrets.secretHash, secret)
+    );
 };
 
 /**

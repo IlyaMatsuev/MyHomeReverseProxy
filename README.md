@@ -91,15 +91,25 @@ Credentials for external (non-local) access and local network detection:
 ```yaml
 secrets:
     username: user
-    password: pass
-    secret: mysecret
+    passwordHash: 49031abf...
+    secretHash: 5a2de1adb...
     # Use single quotes to avoid backslash escaping in YAML
     localAddressPattern: '^127\.0\.0\.1$'
 ```
 
-External requests must include the `X-Proxy-Authorization` header with base64-encoded credentials. Local requests (matching `localAddressPattern`) bypass authentication entirely.
+External requests must include the `X-Proxy-Authorization` header with base64-encoded `username:password:secret` credentials. The plain values are scrypt-hashed at request time and compared against `passwordHash` / `secretHash`. Local requests (matching `localAddressPattern`) bypass authentication entirely.
 
 > **Note:** Always use YAML single-quoted strings for `localAddressPattern` to avoid escape sequence errors. Backslashes in double-quoted YAML strings must be doubled (`\\d`, `\\.`, etc.).
+
+#### Rotating credentials
+
+`passwordHash` and `secretHash` store hash values, so they cannot be edited by hand. Use the `scripts/rotate-credentials.js` node script to set new values and automatically update `config/config.prod.yaml`:
+
+```bash
+node scripts/rotate-credentials.js <username> <password> <secret>
+```
+
+The change is picked up automatically by the running server (the config file is watched), so no restart is needed.
 
 ### `limits`
 
