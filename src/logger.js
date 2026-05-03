@@ -35,5 +35,7 @@ function printLog(message, color, forcePrint) {
 }
 
 function printDateTime() {
-    return chalk.green(`[${[new Date().toISOString()]}]`);
+    const now = new Date();
+    const local = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+    return chalk.green(`[${local.toISOString().slice(0, -1)}]`);
 }
