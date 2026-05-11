@@ -4,7 +4,7 @@ const { rateLimit } = require('express-rate-limit');
 const { getSSLOptions } = require('./ssl');
 const { proxyRequest } = require('./request');
 const { authorized, fromLocalNetwork } = require('./auth');
-const { loadConfig, watchConfig, getLimits } = require('./config');
+const { loadConfig, watchConfig, getLimits, getAddresses } = require('./config');
 const { log, warn, error } = require('./logger');
 
 const PORT = process.env.PORT_HTTPS || 443;
@@ -59,7 +59,11 @@ async function main() {
     const httpServer = express();
     httpServer.use((request, response, next) => {
         const host = request.get('x-host') || request.get('host');
-        // TODO: This is an open-redirect vulnerability
+        if (!host || !getAddresses()[host]) {
+            warn(`HTTP redirect blocked for unknown host: ${host}`);
+            response.status(400).json({ message: `Unknown host: ${host}` });
+            return;
+        }
         response.redirect(301, `https://${host}${request.url}`);
     });
 
