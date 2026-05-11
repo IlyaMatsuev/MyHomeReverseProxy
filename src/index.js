@@ -61,7 +61,7 @@ async function main() {
         const host = request.get('x-host') || request.get('host');
         if (!host || !getAddresses()[host]) {
             warn(`HTTP redirect blocked for unknown host: ${host}`);
-            response.status(400).json({ message: 'Bad Request' });
+            response.status(400).json({ message: `Unknown host: ${host}` });
             return;
         }
         response.redirect(301, `https://${host}${request.url}`);
