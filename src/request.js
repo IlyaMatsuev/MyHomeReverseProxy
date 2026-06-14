@@ -10,6 +10,7 @@ const DEFAULT_PORT = 80;
 const proxyMiddleware = createProxyMiddleware({
     changeOrigin: false,
     ws: true,
+    xfwd: true,
     router: request => getDestinationAddress(getAddresses()[getHost(request)], request.url),
     onError: (err, request, response) => {
         const host = getHost(request);
