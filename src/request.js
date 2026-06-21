@@ -12,10 +12,20 @@ const proxyMiddleware = createProxyMiddleware({
     ws: true,
     xfwd: true,
     router: request => getDestinationAddress(getAddresses()[getHost(request)], request.url),
-    onError: (err, request, response) => {
-        const host = getHost(request);
-        warn(`Service "${host}" is not available: ${err.message}`);
-        response.status(503).json({ message: `Service ${host} is not available` });
+    on: {
+        error: (err, request, response) => {
+            const host = getHost(request);
+            warn(`Service "${host}" is not available: ${err.message}`);
+            if (response.writableEnded) {
+                return;
+            }
+            if (typeof response.writeHead === 'function') {
+                response.writeHead(503, { 'Content-Type': 'application/json' });
+                response.end(JSON.stringify({ message: `Service ${host} is not available` }));
+            } else {
+                response.destroy();
+            }
+        },
     },
 });
 
