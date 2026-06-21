@@ -5,6 +5,7 @@
     "plugin:import/recommended",
     "prettier"
   ],
+  "parserOptions": { "ecmaVersion": "latest", "sourceType": "script" },
   "rules": {
     "consistent-return": "warn",
     "camelcase": "error",

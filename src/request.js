@@ -46,8 +46,39 @@ exports.proxyRequest = async function (request, response, next) {
     return proxyMiddleware(request, response, next);
 };
 
+/**
+ * Handles a WebSocket upgrade by validating the host and delegating to the proxy middleware
+ * @param request HTTP upgrade request (raw http.IncomingMessage)
+ * @param socket Underlying network socket
+ * @param head First packet of the upgraded stream
+ */
+exports.handleUpgrade = function (request, socket, head) {
+    const host = getHost(request);
+    const remoteAddress = request.socket?.remoteAddress;
+    log(`Received WS upgrade on "${host}" from "${remoteAddress}"`, true);
+
+    const targetAddress = getAddresses()[host];
+    if (!targetAddress) {
+        warn(`Could not resolve host for WS upgrade: ${host}`);
+        socket.destroy();
+        return;
+    }
+
+    if (targetAddress.localOnly && !fromLocalNetwork(remoteAddress)) {
+        warn(`WS access denied to local-only address "${host}" from external IP "${remoteAddress}"`);
+        socket.destroy();
+        return;
+    }
+
+    request.headers.host = host;
+    proxyMiddleware.upgrade(request, socket, head);
+};
+
 function getHost(request) {
-    return request.get('x-host') || request.get('host');
+    if (typeof request.get === 'function') {
+        return request.get('x-host') || request.get('host');
+    }
+    return request.headers['x-host'] || request.headers.host;
 }
 
 function getDestinationAddress(address, requestUrl) {

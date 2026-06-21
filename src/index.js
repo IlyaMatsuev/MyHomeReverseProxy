@@ -2,7 +2,7 @@ const express = require('express');
 const https = require('https');
 const { rateLimit } = require('express-rate-limit');
 const { getSSLOptions } = require('./ssl');
-const { proxyRequest } = require('./request');
+const { proxyRequest, handleUpgrade } = require('./request');
 const { authorized, fromLocalNetwork } = require('./auth');
 const { loadConfig, watchConfig, getLimits, getAddresses } = require('./config');
 const { log, warn, error } = require('./logger');
@@ -68,13 +68,33 @@ async function main() {
     });
 
     const sslOptions = getSSLOptions();
+    let server;
     if (sslOptions) {
-        https.createServer(sslOptions, httpsServer).listen(PORT, '0.0.0.0', () => log(`Listening on port ${PORT}`, true));
+        server = https.createServer(sslOptions, httpsServer);
+        server.listen(PORT, '0.0.0.0', () => log(`Listening on port ${PORT}`, true));
         httpServer.listen(PORT_HTTP, '0.0.0.0', () => log(`Listening on port ${PORT_HTTP}`, true));
     } else {
         warn('Running HTTP server since no SSL certificate has been provided');
-        httpsServer.listen(PORT_HTTP, '0.0.0.0', () => log(`Listening on port ${PORT_HTTP}`, true));
+        server = httpsServer.listen(PORT_HTTP, '0.0.0.0', () => log(`Listening on port ${PORT_HTTP}`, true));
     }
+    attachUpgradeHandler(server);
+}
+
+function attachUpgradeHandler(server) {
+    server.on('upgrade', (request, socket, head) => {
+        if (!authorized(request)) {
+            warn(`WS upgrade from "${request.socket.remoteAddress}" was not authorized`);
+            socket.destroy();
+            return;
+        }
+        try {
+            handleUpgrade(request, socket, head);
+        } catch (e) {
+            error(`WS upgrade error: ${e}`);
+            error(`Stack Trace: ${e.stack}`);
+            socket.destroy();
+        }
+    });
 }
 
 main();

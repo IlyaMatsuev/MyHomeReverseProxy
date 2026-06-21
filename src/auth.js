@@ -12,10 +12,12 @@ let localAddressPattern = { pattern: null, regex: null };
  * @return {boolean}
  */
 exports.authorized = function (request) {
-    if (module.exports.fromLocalNetwork(request.ip)) {
+    const ip = request.ip || request.socket?.remoteAddress;
+    if (module.exports.fromLocalNetwork(ip)) {
         return true;
     }
-    const authHeader = request.header(AUTH_HEADER_NAME);
+    const authHeader =
+        typeof request.header === 'function' ? request.header(AUTH_HEADER_NAME) : request.headers[AUTH_HEADER_NAME.toLowerCase()];
     if (!authHeader) {
         return false;
     }
