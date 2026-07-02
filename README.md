@@ -78,6 +78,7 @@ addresses:
         port: 8888 # 80 by default
         startUrl: /dashboard # redirect path for root requests, "" by default
         localOnly: true # false by default; restrict to local network only
+        skipAuth: false # false by default; if true, external requests bypass X-Proxy-Authorization (rate limiting still applies)
 ```
 
 With this configuration, any request to `test.domain.home` is forwarded to `https://111.222.333.4:8888`.
