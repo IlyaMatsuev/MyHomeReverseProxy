@@ -1,5 +1,5 @@
 const { scryptSync, timingSafeEqual } = require('crypto');
-const { getSecrets } = require('./config');
+const { getSecrets, getAddresses } = require('./config');
 
 const AUTH_HEADER_NAME = 'X-Proxy-Authorization';
 
@@ -14,6 +14,10 @@ let localAddressPattern = { pattern: null, regex: null };
 exports.authorized = function (request) {
     const ip = request.ip || request.socket?.remoteAddress;
     if (module.exports.fromLocalNetwork(ip)) {
+        return true;
+    }
+    const host = getHost(request);
+    if (getAddresses()[host]?.skipAuth) {
         return true;
     }
     const authHeader =
@@ -46,4 +50,11 @@ function compareCredential(storedHash, credential) {
     const [hashedCredential, salt] = storedHash.split('.');
     const hashBuffer = scryptSync(credential, salt, 64);
     return timingSafeEqual(Buffer.from(hashedCredential, 'hex'), hashBuffer);
+}
+
+function getHost(request) {
+    if (typeof request.get === 'function') {
+        return request.get('x-host') || request.get('host');
+    }
+    return request.headers['x-host'] || request.headers.host;
 }
