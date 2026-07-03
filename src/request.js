@@ -2,6 +2,7 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 const { fromLocalNetwork } = require('./auth');
 const { getAddresses } = require('./config');
 const { log, warn } = require('./logger');
+const { getHost } = require('./utils');
 
 const DEFAULT_PROTOCOL = 'http';
 const DEFAULT_HOSTNAME = '127.0.0.1';
@@ -83,13 +84,6 @@ exports.handleUpgrade = function (request, socket, head) {
     request.headers.host = host;
     proxyMiddleware.upgrade(request, socket, head);
 };
-
-function getHost(request) {
-    if (typeof request.get === 'function') {
-        return request.get('x-host') || request.get('host');
-    }
-    return request.headers['x-host'] || request.headers.host;
-}
 
 function getDestinationAddress(address, requestUrl) {
     const addressParts = [

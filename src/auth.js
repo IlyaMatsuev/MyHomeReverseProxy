@@ -1,5 +1,6 @@
 const { scryptSync, timingSafeEqual } = require('crypto');
 const { getSecrets, getAddresses } = require('./config');
+const { getHost } = require('./utils');
 
 const AUTH_HEADER_NAME = 'X-Proxy-Authorization';
 
@@ -50,11 +51,4 @@ function compareCredential(storedHash, credential) {
     const [hashedCredential, salt] = storedHash.split('.');
     const hashBuffer = scryptSync(credential, salt, 64);
     return timingSafeEqual(Buffer.from(hashedCredential, 'hex'), hashBuffer);
-}
-
-function getHost(request) {
-    if (typeof request.get === 'function') {
-        return request.get('x-host') || request.get('host');
-    }
-    return request.headers['x-host'] || request.headers.host;
 }
