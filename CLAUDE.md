@@ -30,6 +30,7 @@ The config file contains three sections:
     - `port` - Target port (default: 80)
     - `startUrl` - Redirect path for root requests
     - `localOnly` - If true, only accessible from local network
+    - `skipAuth` - If true, external requests bypass `X-Proxy-Authorization` (rate limiting still applies). Defaults to false
 
 - **secrets** - Auth credentials and local network pattern
 

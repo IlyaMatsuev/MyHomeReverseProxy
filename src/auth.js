@@ -1,5 +1,6 @@
 const { scryptSync, timingSafeEqual } = require('crypto');
-const { getSecrets } = require('./config');
+const { getSecrets, getAddresses } = require('./config');
+const { getHost } = require('./utils');
 
 const AUTH_HEADER_NAME = 'X-Proxy-Authorization';
 
@@ -14,6 +15,10 @@ let localAddressPattern = { pattern: null, regex: null };
 exports.authorized = function (request) {
     const ip = request.ip || request.socket?.remoteAddress;
     if (module.exports.fromLocalNetwork(ip)) {
+        return true;
+    }
+    const host = getHost(request);
+    if (getAddresses()[host]?.skipAuth) {
         return true;
     }
     const authHeader =
