@@ -19,6 +19,9 @@ IlluminatedCloud/
 out/
 target/
 
+# SSL
+traefik/acme/
+
 # System Files
 .DS_Store
 *.db
