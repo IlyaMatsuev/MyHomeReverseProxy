@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# This script updates the IP address associated with the imhouse.duckdns.org domain. The script needs to be executed every 5 minutes to keep the domain accessible.
+# This script updates the IP address associated with the mydomain.duckdns.org domain. The script needs to be executed every 5 minutes to keep the domain accessible.
 
 # The script need to have executable permissions:
 # chmod +x ./scripts/duckdns/duck.sh
@@ -22,4 +22,5 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG_FILE_PATH="$SCRIPT_DIR/duck.log"
 
 
+# TODO: I need to rotate DuckDNS token
 echo url="https://www.duckdns.org/update?domains=imhouse&token=$DUCK_DNS_TOKEN&ip=" | curl -k -o "$LOG_FILE_PATH" -K -

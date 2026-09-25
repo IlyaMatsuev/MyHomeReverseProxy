@@ -1,0 +1,58 @@
+{{ $domain := env "DOMAIN" }}
+{{ if not $domain }}{{ fail "Provide your domain name in the DOMAIN env variable" }}{{ end }}
+
+{{ $router_ip := env "ROUTER_IP" }}
+{{ if not $router_ip }}{{ fail "Provide your router's IP address in the ROUTER_IP env variable" }}{{ end }}
+
+{{ $lan_subnet := env "LAN_SUBNET" }}
+{{ if not $lan_subnet }}{{ fail "Provide your LAN subnet in the LAN_SUBNET env variable" }}{{ end }}
+
+# Local network: any lan subnet address or loopback, except the router
+{{ $lan := printf "(ClientIP(`%s`) || ClientIP(`127.0.0.1`)) && !ClientIP(`%s`)" $lan_subnet $router_ip }}
+
+tls:
+  stores:
+    default:
+      defaultGeneratedCert:
+        resolver: duckdns
+        domain:
+          main: "*.{{ $domain }}"
+
+http:
+  middlewares:
+    rate-limit:
+      rateLimit:
+        average: 1
+        period: 15m
+        burst: 1
+    proxy-auth:
+      forwardAuth:
+        address: http://127.0.0.1:{{ env "FORWARD_AUTH_PORT" }}
+    strip-proxy-auth:
+      headers:
+        customRequestHeaders:
+          # Empty value removes the header before it reaches the backend
+          X-Proxy-Authorization: ""
+    pihole-admin:
+      redirectRegex:
+        # Pihole dashboard URL starts with "/admin"
+        regex: ^(https?://[^/]+)/$
+        replacement: ${1}/admin/
+
+  routers:
+    # Traefik dashboard
+    dashboard:
+      rule: "Host(`traefik.{{ $domain }}`) && {{ $lan }}"
+      # Local network: no auth, no rate limit
+      service: api@internal
+
+    # Network
+    pihole:
+      rule: "Host(`pihole.{{ $domain }}`) && {{ $lan }}"
+      service: pihole
+      middlewares: [ pihole-admin ]
+
+  services:
+    pihole:
+      loadBalancer:
+        servers: [ {url: http://127.0.0.1:{{ env "PIHOLE_PORT_HTTP" }} } ]

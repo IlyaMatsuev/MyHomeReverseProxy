@@ -25,8 +25,16 @@ target/
 # Logs
 *.log
 
+# Routes
+traefik/config/routes.yaml
+
 # SSL
-traefik/acme/
+ssl/**
+traefik/acme/**
+!traefik/acme/README.md
+
+# Secrets
+.env
 
 # Configs
 config/**/.env.*.prod
