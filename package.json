@@ -8,8 +8,9 @@
     "lint-staged": "lint-staged",
     "prettier": "prettier --write",
     "prettier:verify": "prettier --list-different",
-    "traefik:start": "docker compose up traefik -d",
-    "traefik:restart": "docker compose up traefik -d --force-recreate",
+    "traefik:setup": "sh ./traefik/scripts/setup.sh",
+    "traefik:start": "npm run traefik:setup && docker compose up traefik -d",
+    "traefik:restart": "npm run traefik:setup && docker compose up traefik -d --force-recreate",
     "pihole:start": "docker compose up pihole -d",
     "pihole:restart": "docker compose up -d --force-recreate"
   },
