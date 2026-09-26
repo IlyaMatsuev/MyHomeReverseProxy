@@ -70,7 +70,8 @@ Created from [.env.example](.env.example). Changes require `npm run traefik:rest
 | `LAN_SUBNET`                                               | The local network, e.g. `192.168.0.0/24`                                                          |
 | `DOMAIN`                                                   | The DuckDNS domain, e.g. `mydomain.duckdns.org`. Services are available at `<service>.<DOMAIN>`   |
 | `DUCKDNS_TOKEN`                                            | The DuckDNS token, used to update the IP and to get the SSL certificate                           |
-| `FORWARD_AUTH_PORT`                                        | The port of the authorization service (see [Authorization](#authorization))                       |
+| `PROXY_AUTH_HEADER`                                        | The header with the token, e.g. `X-Proxy-Authorization` (see [Authorization](#authorization))     |
+| `PROXY_API_KEY`                                            | The tokens for that header (see [Authorization](#authorization))                                  |
 | `PIHOLE_PORT_DNS`, `PIHOLE_PORT_HTTP`, `PIHOLE_PORT_HTTPS` | The PiHole ports on the server                                                                    |
 
 ### `traefik/config/routes.yaml`
@@ -105,7 +106,7 @@ Add a second router without the `{{ $lan }}` condition:
 hub-remote:
     rule: 'Host(`hub.{{ $domain }}`)'
     service: hub
-    middlewares: [rate-limit, proxy-auth, strip-proxy-auth]
+    middlewares: [rate-limit, proxy-auth]
 ```
 
 Traefik checks longer rules first, so requests from the local network still match the local router (no auth, no rate limit), and all other requests match the `-remote` one. To skip the authorization, leave only `rate-limit` in `middlewares`.
@@ -120,9 +121,21 @@ The `rate-limit` middleware limits the number of requests per client IP. Request
 
 #### Authorization
 
-The `proxy-auth` middleware sends every request to the authorization service at `127.0.0.1:<FORWARD_AUTH_PORT>`, which checks the `X-Proxy-Authorization` header. A custom header is used because the services behind the proxy use `Authorization` themselves. `strip-proxy-auth` removes the header before the request reaches the service.
+The `proxy-auth` middleware checks that the `PROXY_AUTH_HEADER` header (e.g. `X-Proxy-Authorization`) contains one of the `PROXY_API_KEY` tokens, and removes the header before the request reaches the service. Requests without a valid token get `403`. A custom header is used because the services behind the proxy use `Authorization` themselves.
 
-> **Note:** The authorization service isn't part of this project yet. Until it runs, requests through `proxy-auth` get `500`.
+Generate a token, set it as `PROXY_API_KEY` in `.env`, and run `npm run traefik:restart` (`npm run traefik:setup` warns while it's empty). To give each app its own token (to revoke one without changing the others), generate more and separate them with commas: `PROXY_API_KEY=token1,token2`, then run `npm run traefik:restart`.
+
+```bash
+# npm run traefik:token:generate [alias]
+# [alias] is added at the beginning to tell the tokens apart: "phone_<random>"
+npm run traefik:token:generate phone
+```
+
+`PROXY_API_KEY` is required: an empty token would let requests without the header through, so `routes.yaml` isn't loaded without it.
+
+The check is done by the [API Token Middleware](https://github.com/Aetherinox/traefik-api-token-middleware) plugin, which Traefik downloads on start (version in [traefik.yaml](traefik/traefik.yaml)). If the download fails, the routers that use `proxy-auth` are disabled.
+
+> **Note:** The Traefik dashboard shows the middleware settings, including the token. It's available from the local network only.
 
 #### Local network detection
 

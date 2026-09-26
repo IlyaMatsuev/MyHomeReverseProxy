@@ -11,6 +11,7 @@
     "traefik:setup": "sh ./traefik/scripts/setup.sh",
     "traefik:start": "npm run traefik:setup && docker compose up traefik -d",
     "traefik:restart": "npm run traefik:setup && docker compose up traefik -d --force-recreate",
+    "traefik:token:generate": "bash ./traefik/scripts/generate_token.sh",
     "pihole:setup": "sh ./pihole/scripts/setup.sh",
     "pihole:start": "npm run pihole:setup && docker compose up pihole -d",
     "pihole:restart": "npm run pihole:setup && docker compose up pihole -d --force-recreate",

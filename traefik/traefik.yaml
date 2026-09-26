@@ -26,4 +26,11 @@ providers:
 
 api: {}
 
+experimental:
+  plugins:
+    # Downloaded on start: https://github.com/Aetherinox/traefik-api-token-middleware
+    api-token:
+      moduleName: github.com/Aetherinox/traefik-api-token-middleware
+      version: v0.1.4
+
 accessLog: {}

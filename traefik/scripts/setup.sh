@@ -5,7 +5,7 @@
 #  - traefik/config/routes.yaml from traefik/config/routes.yaml.example
 
 # Usage Example:
-# $ sh ./traefik/scripts/setup
+# $ npm run traefik:setup
 
 set -e
 
@@ -20,8 +20,15 @@ copy_if_missing() {
   fi
 }
 
-copy_if_missing "$ROOT_DIR/.env.example" "$ROOT_DIR/.env"
+ENV_PATH="$ROOT_DIR/.env"
+
+copy_if_missing "$ROOT_DIR/.env.example" "$ENV_PATH"
 # Access for the current user only
-chmod 600 "$ROOT_DIR/.env"
+chmod 600 "$ENV_PATH"
+
+# Traefik doesn't load routes.yaml without it
+if [ -z "$(grep -E '^PROXY_API_KEY=' "$ENV_PATH" | tail -n 1 | cut -d '=' -f 2-)" ]; then
+  echo "Warning: PROXY_API_KEY is empty in $ENV_PATH. Generate a token with \"npm run traefik:token:generate [alias]\" and set it there"
+fi
 
 copy_if_missing "$ROOT_DIR/traefik/config/routes.yaml.example" "$ROOT_DIR/traefik/config/routes.yaml"
