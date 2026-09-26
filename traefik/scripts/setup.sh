@@ -9,7 +9,7 @@
 
 set -e
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 
 copy_if_missing() {
   if [ -e "$2" ]; then
@@ -21,6 +21,7 @@ copy_if_missing() {
 }
 
 copy_if_missing "$ROOT_DIR/.env.example" "$ROOT_DIR/.env"
+# Access for the current user only
 chmod 600 "$ROOT_DIR/.env"
 
 copy_if_missing "$ROOT_DIR/traefik/config/routes.yaml.example" "$ROOT_DIR/traefik/config/routes.yaml"

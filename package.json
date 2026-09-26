@@ -11,8 +11,9 @@
     "traefik:setup": "sh ./traefik/scripts/setup.sh",
     "traefik:start": "npm run traefik:setup && docker compose up traefik -d",
     "traefik:restart": "npm run traefik:setup && docker compose up traefik -d --force-recreate",
-    "pihole:start": "docker compose up pihole -d",
-    "pihole:restart": "docker compose up -d --force-recreate"
+    "pihole:setup": "sh ./pihole/scripts/setup.sh",
+    "pihole:start": "npm run pihole:setup && docker compose up pihole -d",
+    "pihole:restart": "npm run pihole:setup && docker compose up pihole -d --force-recreate"
   },
   "author": {
     "name": "Ilya Matsuev",

@@ -12,12 +12,12 @@ services:
     image: pihole/pihole
     container_name: pihole
     restart: unless-stopped
-    env_file: ./config/pihole/.env.pihole.prod
+    env_file: ./pihole/.env
     ports:
       - "${PIHOLE_PORT_DNS:-53}:53/tcp"
       - "${PIHOLE_PORT_DNS:-53}:53/udp"
       - "${PIHOLE_PORT_HTTP:-8080}:8080/tcp"
       - "${PIHOLE_PORT_HTTPS:-8443}:8443/tcp"
     volumes:
-      - ./config/pihole/data:/etc/pihole
-      - ./config/pihole/dnsmasq.d:/etc/dnsmasq.d
+      - ./pihole/data:/etc/pihole
+      - ./pihole/dnsmasq.d:/etc/dnsmasq.d

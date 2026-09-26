@@ -5,27 +5,26 @@ Apart from that it can also be used to add custom DNS names for the local networ
 
 ## 🤔 Prerequisites
 
-Before running the `pihole`, you need to create a file with environment variables at `configs/pihole/.env.pihole.prod`, following the settings examples from `configs/pihole/.env.pihole.example`. You can copy the values using:
+Before running the `pihole`, you need to create a file with environment variables at `pihole/.env`, following the settings examples from `pihole/.env.example`. It's created automatically by `npm run pihole:start`, or you can create it yourself:
 
 ```shell
-# Should be run from the project root
-cp ./configs/pihole/.env.pihole.example ./configs/pihole/.env.pihole.prod
+npm run pihole:setup
 ```
 
-Make sure to specify the correct network interface for `PIHOLE_INTERFACE` according to your network source. Read how to find your network interface [here](./../../scripts/arp-scan/arp-scan.sh).
+Make sure to specify the correct network interface for `PIHOLE_INTERFACE` according to your network source. Read how to find your network interface [here](../scripts/arp-scan/arp-scan.sh).
 
 ## 🎲 Not first time setup
 
 If you ran the `pihole` on your machine before, you can move all the data from:
 
-- `/etc/pihole/` to the `configs/pihole/data` in this project
-- `/etc/dnsmasq.d` to the `configs/pihole/dnsmasq.d` in this project
+- `/etc/pihole/` to the `pihole/data` in this project
+- `/etc/dnsmasq.d` to the `pihole/dnsmasq.d` in this project
 
 This way, running the pihole service as a docker container will preserve the old settings.
 
 ## 1️⃣ First time setup
 
-1. Start the pihole service: `npm run pihole:start:prod`
+1. Start the pihole service: `npm run pihole:start`
 2. Wait a minute, the service needs some time to start up. The logs can be checked with `docker logs -f pihole`
 3. Go to the web interface: `http://{server-ip}:8080/admin`
 
@@ -33,7 +32,7 @@ This way, running the pihole service as a docker container will preserve the old
 - _[Optional]_ Configure Ad lists. Ad lists can be found online and imported via the `Lists` tab.
 - _[Optional]_ Configure local domain names. Local domain names can be configured so that the reverse proxy can forward the requests to the proper service based on the domain name. Domain names can be added via `Settings` -> `Local DNS Records` -> `List of local DNS records`. It's possible to add different domain names for the same address, which is how I use this project:
     - You can add a new entry like `pihole.home -> 192.168.0.100`
-    - After that you can configure the forwarding for this service in `config/addresses.prod.json`. Read more about adding service entries [here](./../../README.md#-configuration)
+    - After that you can configure the forwarding for this service in `traefik/config/routes.yaml`. Read more about adding service entries [here](../README.md#-configuration)
     - This will allow you to access a service by typing the domain name only: `https://pihole.home` - you don't even need to remember the port now!
 
-4. After making any changes, restart the `pihole`: `npm run pihole:restart:prod`
+4. After making any changes, restart the `pihole`: `npm run pihole:restart`
