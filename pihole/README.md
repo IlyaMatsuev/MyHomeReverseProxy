@@ -22,17 +22,18 @@ If you ran the `pihole` on your machine before, you can move all the data from:
 
 This way, running the pihole service as a docker container will preserve the old settings.
 
+> **Note:** PiHole v6 ignores the files in `pihole/dnsmasq.d` by default. Set `FTLCONF_misc_etc_dnsmasq_d=true` in `pihole/.env` if you still need them.
+
 ## 1️⃣ First time setup
 
 1. Start the pihole service: `npm run pihole:start`
 2. Wait a minute, the service needs some time to start up. The logs can be checked with `docker logs -f pihole`
-3. Go to the web interface: `http://{server-ip}:8080/admin`
+3. Go to the web interface: `http://{server-ip}:{PIHOLE_PORT_HTTP}/admin` (`8080` by default), or `https://pihole.<DOMAIN>` once Traefik is running
 
 - Configure DNS settings: `Settings` -> `DNS` -> `Toggle Advanced mode at the top right` -> `Make sure "Interface settings" is set to "Permit all origins"`
+- Resolve the domain to the server's local IP. Set `FTLCONF_misc_dnsmasq_lines` in `pihole/.env` (see [.env.example](.env.example)), e.g. `address=/mydomain.duckdns.org/192.168.0.10`. It resolves the domain and all its subdomains (`hub.mydomain.duckdns.org`, `radarr.mydomain.duckdns.org`, etc.) to the server:
+    - Devices in the local network reach Traefik directly instead of going through the router, so Traefik sees them as local. Without it, requests come from the router's IP, and are treated as requests from the Internet
+    - Now, to add a service, you only need to add it to `traefik/config/routes.yaml`. Read more about adding services [here](../README.md#-configuration)
 - _[Optional]_ Configure Ad lists. Ad lists can be found online and imported via the `Lists` tab.
-- _[Optional]_ Configure local domain names. Local domain names can be configured so that the reverse proxy can forward the requests to the proper service based on the domain name. Domain names can be added via `Settings` -> `Local DNS Records` -> `List of local DNS records`. It's possible to add different domain names for the same address, which is how I use this project:
-    - You can add a new entry like `pihole.home -> 192.168.0.100`
-    - After that you can configure the forwarding for this service in `traefik/config/routes.yaml`. Read more about adding service entries [here](../README.md#-configuration)
-    - This will allow you to access a service by typing the domain name only: `https://pihole.home` - you don't even need to remember the port now!
 
 4. After making any changes, restart the `pihole`: `npm run pihole:restart`

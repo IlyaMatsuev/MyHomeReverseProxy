@@ -4,65 +4,39 @@ This document provides context for AI agents working on this project.
 
 ## Project Overview
 
-A Node.js reverse proxy server that forwards requests for domains with the same IP address to different backend services running on various ports. The server allows unrestricted access from local network but requires authorization for external requests.
+Configuration for running Traefik (reverse proxy) and PiHole (local DNS) on a home server via Docker Compose, plus helper scripts. Traefik routes `<service>.<DOMAIN>` (a wildcard DuckDNS domain) to services on different ports. Requests from the local network are always allowed; selected services are also available from the Internet with a rate limit and a custom `X-Proxy-Authorization` header (the services use `Authorization` themselves). There is no application code.
 
-## Architecture
+## Structure
 
-### Source Files (`src/`)
-
-- **index.js** - Main entry point. Sets up Express HTTPS/HTTP servers with rate limiting and authorization middleware
-- **request.js** - Request routing logic. Maps incoming hostnames to target addresses using config files
-- **auth.js** - Authentication module. Provides `authorized()` for request auth and `fromLocalNetwork()` for IP checks
-- **config.js** - Configuration module. Loads YAML config, provides getters, and watches for file changes
-- **logger.js** - Colored console logging with timestamps
-- **ssl.js** - SSL certificate loading
-
-### Configuration Files (`config/`)
-
-Configuration is stored in a single YAML file per environment: `config.dev.yaml` or `config.prod.yaml` (based on `NODE_ENV`).
-
-The config file contains three sections:
-
-- **addresses** - Hostname to backend mapping (keyed by hostname)
-
-    - `protocol` - Target protocol (default: "http")
-    - `hostname` - Target IP/hostname (default: "127.0.0.1")
-    - `port` - Target port (default: 80)
-    - `startUrl` - Redirect path for root requests
-    - `localOnly` - If true, only accessible from local network
-    - `skipAuth` - If true, external requests bypass `X-Proxy-Authorization` (rate limiting still applies). Defaults to false
-
-- **secrets** - Auth credentials and local network pattern
-
-    - `username`, `passwordHash`, `secretHash` - Credentials for external access (`passwordHash` and `secretHash` store scrypt `<hash>.<salt>` pairs; rotate via `scripts/rotate-credentials.js`)
-    - `localAddressPattern` - Regex to identify local IPs (use YAML single-quoted strings to avoid backslash escape errors)
-
-- **limits** - Rate limiting configuration
-
-    - `windowMs` - Time window in milliseconds
-    - `requestsPerWindow` - Max requests per window
-    - `skipSuccessful` - Skip successful requests from count
-    - `blocked.statusCode` - HTTP status for blocked requests
-    - `blocked.message` - Response body for blocked requests
+- **docker-compose.yaml** - `traefik` (`network_mode: host`, env from `.env`) and `pihole` (env from `pihole/.env`, ports from `.env`)
+- **.env** (from `.env.example`, gitignored) - `ROUTER_IP`, `LAN_SUBNET`, `DOMAIN`, `DUCKDNS_TOKEN`, `FORWARD_AUTH_PORT`, `PIHOLE_PORT_*`
+- **traefik/traefik.yaml** - Static config: entry points (80 -> 443 redirect), the `duckdns` ACME resolver (DNS challenge), file provider watching `traefik/config/`
+- **traefik/config/routes.yaml** (from `routes.yaml.example`, gitignored) - Dynamic config: wildcard certificate, middlewares, routers, services
+- **traefik/acme/acme.json** (gitignored) - Certificates issued by Traefik
+- **traefik/scripts/setup.sh**, **pihole/scripts/setup.sh** - Create the gitignored files from their examples, never overwrite
+- **pihole/** - PiHole env example, `data/` and `dnsmasq.d/` volumes (gitignored)
+- **utils/** - Scripts: `arp-scan/`, `duckdns/` (IP update and cron scheduling), `ssh/` (client/server setup, verify), `scripts/read-env.sh` (sourced helper that reads a variable from the root `.env`)
 
 ## Key Patterns
 
-- Environment detection via `NODE_ENV` (defaults to "dev")
-- Local network requests bypass rate limiting and auth
-- External requests require `X-Proxy-Authorization` header with base64-encoded credentials; alternatively, a `host` query parameter can specify the destination hostname
-- Config file is watched for changes and reloaded automatically
-- Address and secret changes take effect immediately without restart
-- Rate limiter changes require server restart (warning is logged when detected)
+- Environment variables can't be used in `traefik.yaml` (static config). `routes.yaml` is a Go template: `{{ env "VAR" }}`, with `fail` guards for required variables
+- `{{ $lan }}` in `routes.yaml` matches `LAN_SUBNET` or `127.0.0.1` except `ROUTER_IP` (requests that loop back through the router come from its IP). PiHole resolves `<DOMAIN>` to the server's local IP via `FTLCONF_misc_dnsmasq_lines`
+- Local-only service: router with `Host(...) && {{ $lan }}`. Internet access: an extra `<name>-remote` router with only `Host(...)` and `[rate-limit, proxy-auth, strip-proxy-auth]` middlewares; the longer local rule wins for local requests
+- `proxy-auth` is a `forwardAuth` to `127.0.0.1:FORWARD_AUTH_PORT`. That service doesn't exist yet
+- Changes to `routes.yaml` apply without a restart; changes to `.env` or `traefik.yaml` need `npm run traefik:restart`
+- Shell scripts use `$0` for their own path (they're run with `sh` or `bash`), `BASH_SOURCE` only in sourced files
 
 ## Commands
 
 ```bash
-npm start          # Run locally (dev mode)
-npm run start:prod # Run via Docker (prod mode)
-npm run eslint     # Lint and fix
-npm run prettier   # Format code
+npm run traefik:start        # Also traefik:restart, traefik:setup
+npm run pihole:start         # Also pihole:restart, pihole:setup
+npm run duckdns:update-ip    # Also duckdns:update-ip:schedule
+npm run arp-scan             # Also arp-scan:schedule
+npm run ssh:setup:client     # Also ssh:setup:server, ssh:verify
+npm run prettier             # Format code
 ```
 
 ## Testing
 
-No unit tests currently exist in the project.
+No tests exist. Test scripts in a scratch copy or a container, never against the real `~/.ssh`, crontab or system config.

@@ -29,7 +29,6 @@ target/
 traefik/config/routes.yaml
 
 # SSL
-ssl/**
 traefik/acme/**
 !traefik/acme/README.md
 
