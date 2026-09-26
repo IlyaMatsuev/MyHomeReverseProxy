@@ -11,7 +11,7 @@ Before running the `pihole`, you need to create a file with environment variable
 npm run pihole:setup
 ```
 
-Make sure to specify the correct network interface for `PIHOLE_INTERFACE` according to your network source. Read how to find your network interface [here](../scripts/arp-scan/arp-scan.sh).
+Make sure to specify the correct network interface for `PIHOLE_INTERFACE` according to your network source. Read how to find your network interface [here](../utils/arp-scan/arp-scan.sh).
 
 ## 🎲 Not first time setup
 

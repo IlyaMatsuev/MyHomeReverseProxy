@@ -40,10 +40,8 @@ traefik/acme/**
 pihole/data/*
 pihole/dnsmasq.d/*
 
-# Configs
-config/config.prod.yaml
-
 # Others
+tmp/
 **/tsconfig*.json
 **/*.tsbuildinfo
 **/graphql.config.yml

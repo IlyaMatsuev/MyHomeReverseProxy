@@ -55,7 +55,7 @@ At this point your router should be able to always give the same static IP to yo
 4. Configure `config/config.prod.yaml` according to your needs — see the [Configuration](#-configuration) section below for all available options.
 5. Start the reverse proxy on your server: `npm run start:prod`
 6. Configure the PiHole service following [these instructions](pihole). PiHole service can be started with: `npm run pihole:start`
-7. Configure the automatic network MAC addresses scan by following the guide in [this script](scripts/arp-scan/arp-scan.sh)
+7. Configure the automatic network MAC addresses scan by following the guide in [this script](utils/arp-scan/arp-scan.sh)
 
 ## ⚙️ Configuration
 

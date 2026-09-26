@@ -22,6 +22,9 @@ target/
 # SSL
 traefik/acme/
 
+# Pihole
+pihole/data/
+
 # System Files
 .DS_Store
 *.db
@@ -29,3 +32,6 @@ traefik/acme/
 
 # Logs
 *.log
+
+# Other
+tmp/

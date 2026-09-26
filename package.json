@@ -13,7 +13,14 @@
     "traefik:restart": "npm run traefik:setup && docker compose up traefik -d --force-recreate",
     "pihole:setup": "sh ./pihole/scripts/setup.sh",
     "pihole:start": "npm run pihole:setup && docker compose up pihole -d",
-    "pihole:restart": "npm run pihole:setup && docker compose up pihole -d --force-recreate"
+    "pihole:restart": "npm run pihole:setup && docker compose up pihole -d --force-recreate",
+    "arp-scan": "sudo bash ./utils/arp-scan/arp-scan.sh",
+    "arp-scan:schedule": "sudo bash ./utils/arp-scan/schedule.sh",
+    "duckdns:update-ip": "bash ./utils/duckdns/update_ip.sh",
+    "duckdns:update-ip:schedule": "bash ./utils/duckdns/schedule_update_ip.sh",
+    "ssh:setup:client": "bash ./utils/ssh/setup_client.sh",
+    "ssh:setup:server": "sudo bash ./utils/ssh/setup_server.sh",
+    "ssh:verify": "bash ./utils/ssh/verify.sh"
   },
   "author": {
     "name": "Ilya Matsuev",
