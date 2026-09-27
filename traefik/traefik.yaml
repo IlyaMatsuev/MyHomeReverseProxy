@@ -40,13 +40,16 @@ experimental:
 log:
   # Default is ERROR. INFO also shows config reloads and certificate renewals
   level: INFO
+  filePath: /etc/traefik/logs/traefik.log
+  # Rotated by Traefik: at most 3 old files of 10 MB
+  maxSize: 10
+  maxBackups: 3
 
 accessLog:
+  # Traefik doesn't rotate it, "npm run traefik:logs:rotate" makes logrotate do it weekly
+  filePath: /etc/traefik/logs/access.log
   # JSON, so every value comes with its name
   format: json
-  filters:
-    # Everything except 404: bots scanning the IP for common paths get it from Traefik, no router matches them
-    statusCodes: ["100-403", "405-599"]
   fields:
     # Only these fields. The headers are dropped too, which keeps the tokens out of the log
     defaultMode: drop

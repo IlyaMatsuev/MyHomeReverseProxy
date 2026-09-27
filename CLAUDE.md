@@ -13,8 +13,10 @@ MyHomeReverseProxy, part of the MyHome ecosystem: configuration for running Trae
 - **traefik/traefik.yaml** - Static config: entry points (80 -> 443 redirect), the `duckdns` ACME resolver (DNS challenge), file provider watching `traefik/config/`
 - **traefik/config/routes.yaml** (from `routes.yaml.example`, gitignored) - Dynamic config: wildcard certificate, middlewares, routers, services
 - **traefik/acme/acme.json** (gitignored) - Certificates issued by Traefik
-- **traefik/scripts/setup.sh**, **pihole/scripts/setup.sh** - Create the gitignored files from their examples, never overwrite. Traefik's also warns if `PROXY_API_KEY` is empty
+- **traefik/logs/** (gitignored) - `traefik.log` (rotated by Traefik) and `access.log` (JSON, rotated by logrotate)
+- **traefik/scripts/setup.sh**, **pihole/scripts/setup.sh** - Create the gitignored files from their examples, never overwrite. Traefik's also warns if `PROXY_API_KEY` is empty and runs `setup_logrotate.sh` (sudo) unless `/etc/logrotate.d/traefik` already has this project's path
 - **traefik/scripts/generate_token.sh** - Prints a random token for `PROXY_API_KEY`
+- **traefik/scripts/setup_logrotate.sh** - Writes `/etc/logrotate.d/traefik` for `access.log` (Traefik doesn't rotate it)
 - **pihole/** - PiHole env example, `data/` and `dnsmasq.d/` volumes (gitignored)
 - **utils/** - Scripts: `arp-scan/`, `duckdns/` (IP update and cron scheduling), `ssh/` (client/server setup, verify), `scripts/read-env.sh` (sourced helper that reads a variable from the root `.env`)
 
@@ -30,7 +32,7 @@ MyHomeReverseProxy, part of the MyHome ecosystem: configuration for running Trae
 ## Commands
 
 ```bash
-npm run traefik:start        # Also traefik:restart, traefik:setup, traefik:token:generate
+npm run traefik:start        # Also traefik:restart, traefik:setup, traefik:token:generate, traefik:logs:rotate
 npm run pihole:start         # Also pihole:restart, pihole:setup
 npm run duckdns:update-ip    # Also duckdns:update-ip:schedule
 npm run arp-scan             # Also arp-scan:schedule

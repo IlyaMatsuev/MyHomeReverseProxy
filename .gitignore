@@ -23,6 +23,7 @@ target/
 *.ini
 
 # Logs
+traefik/logs/
 *.log
 
 # Routes

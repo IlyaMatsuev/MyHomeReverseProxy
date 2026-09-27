@@ -1,8 +1,16 @@
+# Docker keeps container logs forever by default. Rotate them instead: at most 3 files of 10 MB per container
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: 10m
+    max-file: "3"
+
 services:
   traefik:
     image: traefik:v3.7
     container_name: traefik
     restart: unless-stopped
+    logging: *logging
     env_file: .env
     network_mode: host
     volumes:
@@ -12,6 +20,7 @@ services:
     image: pihole/pihole
     container_name: pihole
     restart: unless-stopped
+    logging: *logging
     env_file: ./pihole/.env
     ports:
       - "${PIHOLE_PORT_DNS:-53}:53/tcp"

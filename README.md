@@ -144,11 +144,20 @@ The check is done by the [API Token Middleware](https://github.com/Aetherinox/tr
 
 A request is local when it comes from `LAN_SUBNET` or `127.0.0.1`, except `ROUTER_IP`. When a local device resolves `<DOMAIN>` to the public IP, its requests come back through the router with the router's IP, which is why the router is excluded, and why PiHole needs to resolve `<DOMAIN>` to the server's local IP.
 
+## 📜 Logs
+
+Traefik writes its logs to `traefik/logs` (gitignored):
+
+- `traefik.log` - Traefik's own messages: startup, config errors, certificates. Traefik rotates it automatically (3 old files of 10 MB). Only readable by root
+- `access.log` - One JSON line per request. Rotated weekly by `logrotate`, the last 4 weeks are kept
+
+Logrotate routine (for `access.log`) is set up initially via `npm run traefik:setup` but if the utility was not installed, you can run `npm run traefik:logs:rotate` later to set it up separately.
+
 ## 🛠️ Troubleshooting
 
 ### 404 Not Found
 
-No router matched the request. Check that the service is in `routes.yaml`, and check `docker logs traefik` for errors in the file. If it happens from the local network only for local services, your device resolves `<DOMAIN>` to the public IP, see [PiHole](pihole).
+No router matched the request. Check that the service is in `routes.yaml`, and check `traefik/logs/traefik.log` for errors in the file. If it happens from the local network only for local services, your device resolves `<DOMAIN>` to the public IP, see [PiHole](pihole).
 
 ### 502 Bad Gateway
 

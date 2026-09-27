@@ -18,7 +18,7 @@ Prerequisites:
 - Check the certificate requests and renewals:
 
 ```sh
-docker logs traefik 2>&1 | grep -i acme
+sudo grep -i acme traefik/logs/traefik.log
 ```
 
 - Force a new certificate (e.g. after changing `DOMAIN`):
