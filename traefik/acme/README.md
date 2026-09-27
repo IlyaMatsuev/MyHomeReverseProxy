@@ -4,7 +4,7 @@ Traefik renews the SSL certificate by itself, there are no manual steps.
 
 ## How it works
 
-- Traefik requests a wildcard certificate for `*.<DOMAIN>` from Let's Encrypt when it starts (`tls.stores.default.defaultGeneratedCert` in [routes.yaml](../config/routes.yaml.example))
+- Traefik requests a wildcard certificate for `*.<DOMAIN>` from Let's Encrypt when it starts (`tls: *tls` on the routers in [routes.yaml](../config/routes.yaml.example))
 - The domain ownership is proven with a DNS challenge through DuckDNS, using `DUCKDNS_TOKEN` from `.env` (the `duckdns` resolver in [traefik.yaml](../traefik.yaml))
 - The certificate is stored in `traefik/acme/acme.json` (this folder) and renewed automatically 30 days before it expires
 

@@ -19,13 +19,11 @@
 # Local network: any lan subnet address or loopback, except the router
 # {{ $lan := printf "(ClientIP(`%s`) || ClientIP(`127.0.0.1`)) && !ClientIP(`%s`)" $lan_subnet $router_ip }}
 
-tls:
-  stores:
-    default:
-      defaultGeneratedCert:
-        resolver: duckdns
-        domain:
-          main: "*.{{ $domain }}"
+# Wildcard certificate for all subdomains, every router needs "tls: *tls"
+# This is a workaround to avoid tls error before acme/acme.json is loaded on every traefik restart (previously this was in "tls.stores.default.defaultGeneratedCert")
+x-tls: &tls
+  certResolver: duckdns
+  domains: [ { main: "*.{{ $domain }}" } ]
 
 http:
   middlewares:
@@ -63,12 +61,14 @@ http:
     # Traefik dashboard
     dashboard:
       rule: "Host(`traefik.{{ $domain }}`) && {{ $lan }}"
+      tls: *tls
       # Local network: no auth, no rate limit
       service: api@internal
 
     # Network
     pihole:
       rule: "Host(`pihole.{{ $domain }}`) && {{ $lan }}"
+      tls: *tls
       service: pihole
       middlewares: [ pihole-admin ]
 

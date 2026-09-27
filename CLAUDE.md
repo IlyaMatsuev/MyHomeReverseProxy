@@ -13,9 +13,10 @@ MyHomeReverseProxy, part of the MyHome ecosystem: configuration for running Trae
 - **traefik/traefik.yaml** - Static config: entry points (80 -> 443 redirect), the `duckdns` ACME resolver (DNS challenge), file provider watching `traefik/config/`
 - **traefik/config/routes.yaml** (from `routes.yaml.example`, gitignored) - Dynamic config: wildcard certificate, middlewares, routers, services
 - **traefik/acme/acme.json** (gitignored) - Certificates issued by Traefik
-- **traefik/logs/** (gitignored) - `traefik.log` (rotated by Traefik) and `access.log` (JSON, rotated by logrotate)
+- **traefik/logs/** (gitignored) - `traefik.log` (rotated by Traefik) and `access.log` (JSON, all fields, headers dropped except `User-Agent`, rotated by logrotate)
 - **traefik/scripts/setup.sh**, **pihole/scripts/setup.sh** - Create the gitignored files from their examples, never overwrite. Traefik's also warns if `PROXY_API_KEY` is empty and runs `setup_logrotate.sh` (sudo) unless `/etc/logrotate.d/traefik` already has this project's path
 - **traefik/scripts/generate_token.sh** - Prints a random token for `PROXY_API_KEY`
+- **traefik/scripts/logs.sh** - Prints the end of `traefik.log`, then follows `access.log` as a table of the useful fields (`jq`)
 - **traefik/scripts/setup_logrotate.sh** - Writes `/etc/logrotate.d/traefik` for `access.log` (Traefik doesn't rotate it)
 - **pihole/** - PiHole env example, `data/` and `dnsmasq.d/` volumes (gitignored)
 - **utils/** - Scripts: `arp-scan/`, `duckdns/` (IP update and cron scheduling), `ssh/` (client/server setup, verify), `scripts/read-env.sh` (sourced helper that reads a variable from the root `.env`)
@@ -24,7 +25,7 @@ MyHomeReverseProxy, part of the MyHome ecosystem: configuration for running Trae
 
 - Environment variables can't be used in `traefik.yaml` (static config). `routes.yaml` is a Go template: `{{ env "VAR" }}`, with `fail` guards for required variables. Template-only lines are inside YAML comments (`# {{ ... }}`) and other `{{ }}` are inside quoted strings, so the raw file is valid YAML too
 - `{{ $lan }}` in `routes.yaml` matches `LAN_SUBNET` or `127.0.0.1` except `ROUTER_IP` (requests that loop back through the router come from its IP). PiHole resolves `<DOMAIN>` to the server's local IP via `FTLCONF_misc_dnsmasq_lines`
-- Local-only service: router with `Host(...) && {{ $lan }}`. Internet access: an extra `<name>-remote` router with only `Host(...)` and `[rate-limit, proxy-auth]` middlewares; the longer local rule wins for local requests
+- Local-only service: router with `Host(...) && {{ $lan }}` and `tls: *tls` (the wildcard certificate, the `x-tls` anchor). Internet access: an extra `<name>-remote` router with only `Host(...)` and `[rate-limit, proxy-auth]` middlewares; the longer local rule wins for local requests
 - `proxy-auth` is the `api-token` plugin (Aetherinox/traefik-api-token-middleware, downloaded on start via `experimental.plugins`): checks the `PROXY_AUTH_HEADER` header against `PROXY_API_KEY` and removes the header; `Authorization` is left for the services. Plugin options are read by Go field name, not the documented JSON tag (`removeTokenNameOnFailure`, not `removeTokenNameOnError`). `PROXY_API_KEY` has a `fail` guard: an empty token matches requests without the header
 - Changes to `routes.yaml` apply without a restart; changes to `.env` or `traefik.yaml` need `npm run traefik:restart`
 - Shell scripts use `$0` for their own path (they're run with `sh` or `bash`), `BASH_SOURCE` only in sourced files
