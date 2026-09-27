@@ -188,4 +188,4 @@ For major changes, please open an issue first to discuss what you would like to 
 
 ## 🎫 License
 
-[MIT](LICENSE)
+[PolyForm Noncommercial 1.0.0](LICENSE): free for personal and other noncommercial use. Contact me for commercial use.
