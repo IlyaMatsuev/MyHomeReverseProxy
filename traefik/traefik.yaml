@@ -48,14 +48,10 @@ log:
 accessLog:
   # Traefik doesn't rotate it, "npm run traefik:logs:rotate" makes logrotate do it weekly
   filePath: /etc/traefik/logs/access.log
-  # JSON, so every value comes with its name
+  # JSON, so every value comes with its name. All fields are kept, "npm run traefik:logs" shows the useful ones
   format: json
   fields:
-    # Only these fields. The headers are dropped too, which keeps the tokens out of the log
-    defaultMode: drop
-    names:
-      ClientHost: keep
-      RequestMethod: keep
-      RequestPath: keep
-      DownstreamStatus: keep
-      RouterName: keep
+    headers:
+      # Headers are dropped by default, which keeps the tokens out of the log
+      names:
+        User-Agent: keep

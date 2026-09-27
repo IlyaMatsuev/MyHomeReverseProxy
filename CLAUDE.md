@@ -33,7 +33,7 @@ MyHomeReverseProxy, part of the MyHome ecosystem: configuration for running Trae
 ## Commands
 
 ```bash
-npm run traefik:start        # Also traefik:restart, traefik:setup, traefik:token:generate, traefik:logs:rotate
+npm run traefik:start        # Also traefik:restart, traefik:setup, traefik:token:generate, traefik:logs, traefik:logs:rotate
 npm run pihole:start         # Also pihole:restart, pihole:setup
 npm run duckdns:update-ip    # Also duckdns:update-ip:schedule
 npm run arp-scan             # Also arp-scan:schedule
