@@ -8,8 +8,8 @@ Configuration for running Traefik (reverse proxy) and PiHole (local DNS) on a ho
 
 ## Structure
 
-- **docker-compose.yaml** - `traefik` (`network_mode: host`, env from `.env`) and `pihole` (env from `pihole/.env`, ports from `.env`)
-- **.env** (from `.env.example`, gitignored) - `ROUTER_IP`, `LAN_SUBNET`, `DOMAIN`, `DUCKDNS_TOKEN`, `PROXY_AUTH_HEADER`, `PROXY_API_KEY`, `PIHOLE_PORT_*`
+- **docker-compose.yaml** - `traefik` (`network_mode: host`, env from `.env`) and `pihole` (env from `pihole/.env`: `TZ`, `PIHOLE_INTERFACE`, `FTLCONF_*`; ports from `.env`)
+- **.env** (from `.env.example`, gitignored) - `TZ`, `ROUTER_IP`, `LAN_SUBNET`, `DOMAIN`, `DUCKDNS_TOKEN`, `PROXY_AUTH_HEADER`, `PROXY_API_KEY`, `PIHOLE_PORT_*`
 - **traefik/traefik.yaml** - Static config: entry points (80 -> 443 redirect), the `duckdns` ACME resolver (DNS challenge), file provider watching `traefik/config/`
 - **traefik/config/routes.yaml** (from `routes.yaml.example`, gitignored) - Dynamic config: wildcard certificate, middlewares, routers, services
 - **traefik/acme/acme.json** (gitignored) - Certificates issued by Traefik

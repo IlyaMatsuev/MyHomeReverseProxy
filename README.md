@@ -18,6 +18,8 @@ Apart from that, this project also provides:
 - Configuration for the [PiHole](pihole) service, which is used as the DNS server for the local network
 - Scripts to keep the [DuckDNS](https://www.duckdns.org/) domain pointing to your public IP, scan the local network with `arp-scan`, and [set up SSH access](utils/ssh) to the server
 
+![My Home Banner](./public/banner.png)
+
 ## 🔍 Usage
 
 ```bash
@@ -66,6 +68,7 @@ Created from [.env.example](.env.example). Changes require `npm run traefik:rest
 
 | Variable                                                   | Description                                                                                       |
 | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `TZ`                                                       | The time zone for the log timestamps, e.g. `Europe/Amsterdam`. UTC if empty                       |
 | `ROUTER_IP`                                                | The router's IP. Requests from it are treated as external (see [below](#local-network-detection)) |
 | `LAN_SUBNET`                                               | The local network, e.g. `192.168.0.0/24`                                                          |
 | `DOMAIN`                                                   | The DuckDNS domain, e.g. `mydomain.duckdns.org`. Services are available at `<service>.<DOMAIN>`   |
@@ -127,8 +130,8 @@ Generate a token, set it as `PROXY_API_KEY` in `.env`, and run `npm run traefik:
 
 ```bash
 # npm run traefik:token:generate [alias]
-# [alias] is added at the beginning to tell the tokens apart: "phone_<random>"
-npm run traefik:token:generate phone
+# [alias] is added at the beginning to tell the tokens apart: "webapp_<random>"
+npm run traefik:token:generate webapp
 ```
 
 `PROXY_API_KEY` is required: an empty token would let requests without the header through, so `routes.yaml` isn't loaded without it.

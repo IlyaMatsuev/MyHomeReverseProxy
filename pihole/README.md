@@ -11,6 +11,8 @@ Before running the `pihole`, you need to create a file with environment variable
 npm run pihole:setup
 ```
 
+Set `TZ` to your time zone (e.g. `Europe/Amsterdam`) for the timestamps in the logs and the dashboard, it's UTC if empty.
+
 Make sure to specify the correct network interface for `PIHOLE_INTERFACE` according to your network source. Read how to find your network interface [here](../utils/arp-scan/arp-scan.sh).
 
 ## 🎲 Not first time setup
