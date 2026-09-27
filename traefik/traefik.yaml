@@ -1,0 +1,48 @@
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+  websecure:
+    address: ":443"
+    http:
+      tls: {}
+
+certificatesResolvers:
+  duckdns:
+    acme:
+      storage: /etc/traefik/acme/acme.json
+      dnsChallenge:
+        # Reads DUCKDNS_TOKEN from the environment
+        provider: duckdns
+
+providers:
+  file:
+    directory: /etc/traefik/config
+    watch: true
+
+api: {}
+
+experimental:
+  plugins:
+    # Downloaded on start: https://github.com/Aetherinox/traefik-api-token-middleware
+    api-token:
+      moduleName: github.com/Aetherinox/traefik-api-token-middleware
+      version: v0.1.4
+
+log:
+  # Default is ERROR. INFO also shows config reloads and certificate renewals
+  level: INFO
+
+accessLog:
+  fields:
+    names:
+      # Timestamps in the TZ time zone (.env) instead of UTC
+      StartUTC: drop
+    headers:
+      # Headers are dropped by default, which keeps the tokens out of the log
+      names:
+        User-Agent: keep

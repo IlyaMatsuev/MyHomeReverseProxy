@@ -1,0 +1,78 @@
+# Go template, rendered by Traefik before the YAML is parsed. Template-only lines are YAML comments,
+# so the file stays valid YAML for editors, and they render to empty comments
+
+# {{ $domain := env "DOMAIN" }}
+# {{ if not $domain }}{{ fail "Provide your domain name in the DOMAIN env variable" }}{{ end }}
+
+# {{ $router_ip := env "ROUTER_IP" }}
+# {{ if not $router_ip }}{{ fail "Provide your router's IP address in the ROUTER_IP env variable" }}{{ end }}
+
+# {{ $lan_subnet := env "LAN_SUBNET" }}
+# {{ if not $lan_subnet }}{{ fail "Provide your LAN subnet in the LAN_SUBNET env variable" }}{{ end }}
+
+# {{ $auth_header := env "PROXY_AUTH_HEADER" }}
+# {{ if not $auth_header }}{{ fail "Provide the header name for the proxy token in the PROXY_AUTH_HEADER env variable, e.g. X-Proxy-Authorization" }}{{ end }}
+
+# {{ $api_key := env "PROXY_API_KEY" }}
+# {{ if not $api_key }}{{ fail "Provide the proxy token in the PROXY_API_KEY env variable, generate it with \"npm run traefik:token:generate\"" }}{{ end }}
+
+# Local network: any lan subnet address or loopback, except the router
+# {{ $lan := printf "(ClientIP(`%s`) || ClientIP(`127.0.0.1`)) && !ClientIP(`%s`)" $lan_subnet $router_ip }}
+
+tls:
+  stores:
+    default:
+      defaultGeneratedCert:
+        resolver: duckdns
+        domain:
+          main: "*.{{ $domain }}"
+
+http:
+  middlewares:
+    rate-limit:
+      rateLimit:
+        # Per client IP: 20 requests per second on average, bursts of up to 100 (e.g. a page load with many files).
+        # Only stops floods of requests: guessing a token isn't realistic at any rate
+        average: 20
+        period: 1s
+        burst: 100
+    proxy-auth:
+      plugin:
+        api-token:
+          authenticationHeaderName: '{{ $auth_header }}'
+          # Keeps the Authorization header for the services
+          bearerHeader: false
+          # Removes the token header before the request reaches the service
+          removeHeadersOnSuccess: true
+          # Doesn't reveal the expected header name in the error response
+          removeTokenNameOnFailure: true
+          # Comma-separated tokens (e.g. one per app)
+          # Run is a loop to support multiple tokens and trim them
+          # Even though the lines are commented, the code is still executed by traefik
+          tokens:
+            # {{ range splitList "," $api_key }}{{ if trim . }}
+            - '{{ trim . }}'
+            # {{ end }}{{ end }}
+    pihole-admin:
+      redirectRegex:
+        # Pihole dashboard URL starts with "/admin"
+        regex: ^(https?://[^/]+)/$
+        replacement: ${1}/admin/
+
+  routers:
+    # Traefik dashboard
+    dashboard:
+      rule: "Host(`traefik.{{ $domain }}`) && {{ $lan }}"
+      # Local network: no auth, no rate limit
+      service: api@internal
+
+    # Network
+    pihole:
+      rule: "Host(`pihole.{{ $domain }}`) && {{ $lan }}"
+      service: pihole
+      middlewares: [ pihole-admin ]
+
+  services:
+    pihole:
+      loadBalancer:
+        servers: [ { url: 'http://127.0.0.1:{{ env "PIHOLE_PORT_HTTP" }}' } ]

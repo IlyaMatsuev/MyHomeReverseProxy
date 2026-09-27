@@ -25,17 +25,22 @@ target/
 # Logs
 *.log
 
-# SSL
-ssl/**
-!ssl/README.md
+# Routes
+traefik/config/routes.yaml
 
-# Configs
-config/**/.env.*.prod
-config/pihole/data/*
-config/pihole/dnsmasq.d/*
-config/config.prod.yaml
+# SSL
+traefik/acme/**
+!traefik/acme/README.md
+
+# Secrets
+.env
+
+# Pihole
+pihole/data/*
+pihole/dnsmasq.d/*
 
 # Others
+tmp/
 **/tsconfig*.json
 **/*.tsbuildinfo
 **/graphql.config.yml

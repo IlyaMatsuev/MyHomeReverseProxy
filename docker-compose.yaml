@@ -1,32 +1,23 @@
 services:
-  reverse-proxy:
-    image: ilyamatsuev/reverse-proxy
-    container_name: reverse-proxy
-    build: .
+  traefik:
+    image: traefik:v3.7
+    container_name: traefik
     restart: unless-stopped
-    tty: true
-    volumes:
-      - ./config:/app/config
-      - ./ssl:/app/ssl
-    environment:
-      - TZ=Europe/Amsterdam
-      - PORT_HTTP=80
-      - PORT_HTTPS=443
-      - NODE_ENV=prod
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
+    env_file: .env
     network_mode: host
+    volumes:
+      - ./traefik:/etc/traefik
 
   pihole:
     image: pihole/pihole
     container_name: pihole
     restart: unless-stopped
-    env_file: ./config/pihole/.env.pihole.prod
+    env_file: ./pihole/.env
     ports:
-      - "53:53/tcp"
-      - "53:53/udp"
-      - "8080:8080/tcp"
-      - "8443:8443/tcp"
+      - "${PIHOLE_PORT_DNS:-53}:53/tcp"
+      - "${PIHOLE_PORT_DNS:-53}:53/udp"
+      - "${PIHOLE_PORT_HTTP:-8080}:8080/tcp"
+      - "${PIHOLE_PORT_HTTPS:-8443}:8443/tcp"
     volumes:
-      - ./config/pihole/data:/etc/pihole
-      - ./config/pihole/dnsmasq.d:/etc/dnsmasq.d
+      - ./pihole/data:/etc/pihole
+      - ./pihole/dnsmasq.d:/etc/dnsmasq.d

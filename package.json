@@ -2,25 +2,30 @@
   "name": "my-reverse-proxy",
   "private": true,
   "version": "1.0.0",
-  "description": "The project is a simple reverse proxy that is used mainly to forward requests for domains with the same IP address to the same machine but on different ports.",
+  "description": "The project contains settings and configurations required for running a reverse proxy on the local server.",
   "scripts": {
     "prepare": "husky",
     "lint-staged": "lint-staged",
     "prettier": "prettier --write",
     "prettier:verify": "prettier --list-different",
-    "eslint": "eslint --fix",
-    "eslint:verify": "eslint --quiet",
-    "image:build": "docker compose build reverse-proxy",
-    "image:publish": "./scriprs/docker/publish.sh",
-    "start": "node src/index.js",
-    "start:prod": "docker compose up reverse-proxy -d",
-    "restart:prod": "docker compose up reverse-proxy -d --force-recreate",
-    "pihole:start:prod": "docker compose up pihole -d",
-    "pihole:restart:prod": "docker compose up -d --force-recreate"
+    "traefik:setup": "sh ./traefik/scripts/setup.sh",
+    "traefik:start": "npm run traefik:setup && docker compose up traefik -d",
+    "traefik:restart": "npm run traefik:setup && docker compose up traefik -d --force-recreate",
+    "traefik:token:generate": "bash ./traefik/scripts/generate_token.sh",
+    "pihole:setup": "sh ./pihole/scripts/setup.sh",
+    "pihole:start": "npm run pihole:setup && docker compose up pihole -d",
+    "pihole:restart": "npm run pihole:setup && docker compose up pihole -d --force-recreate",
+    "arp-scan": "sudo bash ./utils/arp-scan/arp-scan.sh",
+    "arp-scan:schedule": "sudo bash ./utils/arp-scan/schedule.sh",
+    "duckdns:update-ip": "bash ./utils/duckdns/update_ip.sh",
+    "duckdns:update-ip:schedule": "bash ./utils/duckdns/schedule_update_ip.sh",
+    "ssh:setup:client": "bash ./utils/ssh/setup_client.sh",
+    "ssh:setup:server": "sudo bash ./utils/ssh/setup_server.sh",
+    "ssh:verify": "bash ./utils/ssh/verify.sh"
   },
   "author": {
     "name": "Ilya Matsuev",
-    "email": "ilya.matsuev.personal@gmail.com",
+    "email": "ilya.matsuev.business@proton.me",
     "url": "https://github.com/IlyaMatsuev"
   },
   "repository": {
@@ -28,12 +33,7 @@
     "url": "https://github.com/IlyaMatsuev/MyReverseProxy"
   },
   "devDependencies": {
-    "@babel/eslint-parser": "^7.25.8",
     "@types/node": "^22.13.4",
-    "eslint": "^8.57.1",
-    "eslint-config-prettier": "^9.1.0",
-    "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-prettier": "^5.0.0",
     "husky": "^9.1.6",
     "lint-staged": "^15.2.10",
     "prettier": "^3.3.3"
@@ -41,17 +41,6 @@
   "lint-staged": {
     "**/*.{html,js,ts,css,xml,yaml,yml,json,md}": [
       "npm run prettier"
-    ],
-    "**/*.{js,ts}": [
-      "npm run eslint"
     ]
-  },
-  "dependencies": {
-    "@types/express": "^5.0.0",
-    "chalk": "^4.1.2",
-    "express": "^4.21.2",
-    "express-rate-limit": "^7.5.0",
-    "http-proxy-middleware": "^3.0.5",
-    "js-yaml": "^4.1.1"
   }
 }

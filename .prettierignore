@@ -19,6 +19,12 @@ IlluminatedCloud/
 out/
 target/
 
+# SSL
+traefik/acme/
+
+# Pihole
+pihole/data/
+
 # System Files
 .DS_Store
 *.db
@@ -26,3 +32,6 @@ target/
 
 # Logs
 *.log
+
+# Other
+tmp/
