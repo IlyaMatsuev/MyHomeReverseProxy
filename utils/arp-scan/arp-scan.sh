@@ -12,9 +12,22 @@
 
 INTERFACE=${1:-wlan0}
 
+# arp-scan and ip live in sbin, which cron's default PATH (/usr/bin:/bin) doesn't include
+PATH="/usr/sbin:/sbin:$PATH"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-LOG_FILE="$SCRIPT_DIR/${INTERFACE}-latest.log"
+LOG_FILE="$SCRIPT_DIR/logs/${INTERFACE}-latest.log"
+mkdir -p "$SCRIPT_DIR/logs"
+
+if ! ip link show "$INTERFACE" >/dev/null 2>&1; then
+    echo "Error: the network interface \"$INTERFACE\" doesn't exist" >&2
+    echo "Find the one with your local IP (e.g. 192.168.0.10):" >&2
+    echo "  ip -brief addr" >&2
+    echo "...and pass it:" >&2
+    echo "  npm run arp-scan <interface>" >&2
+    exit 1
+fi
 
 SUBNET=$(ip -4 addr show "$INTERFACE" | grep -oP '(?<=inet\s)\d+\.\d+\.\d+')
 
@@ -32,4 +45,4 @@ fi
     echo "========================="
     echo
     arp-scan --interface="$INTERFACE" --localnet
-} > "$LOG_FILE"
+} | tee "$LOG_FILE"

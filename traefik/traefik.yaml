@@ -33,4 +33,16 @@ experimental:
       moduleName: github.com/Aetherinox/traefik-api-token-middleware
       version: v0.1.4
 
-accessLog: {}
+log:
+  # Default is ERROR. INFO also shows config reloads and certificate renewals
+  level: INFO
+
+accessLog:
+  fields:
+    names:
+      # Timestamps in the TZ time zone (.env) instead of UTC
+      StartUTC: drop
+    headers:
+      # Headers are dropped by default, which keeps the tokens out of the log
+      names:
+        User-Agent: keep

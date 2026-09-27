@@ -13,8 +13,8 @@ JOB_CRON="0 * * * *"
 
 SCRIPT_PATH="$(cd "$(dirname "$0")" && pwd)/arp-scan.sh"
 
-# Cron's default PATH (/usr/bin:/bin) doesn't include arp-scan and ip, which live in sbin
-JOB="$JOB_CRON PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin /bin/bash \"$SCRIPT_PATH\" $INTERFACE"
+# The results are in the log file, the terminal output isn't needed
+JOB="$JOB_CRON /bin/bash \"$SCRIPT_PATH\" $INTERFACE >/dev/null 2>&1"
 
 if crontab -l 2>/dev/null | grep -qF "$SCRIPT_PATH"; then
     echo "Skipped: the job already exists"

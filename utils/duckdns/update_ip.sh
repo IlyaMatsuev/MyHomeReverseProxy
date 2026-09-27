@@ -10,7 +10,8 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-LOG_FILE_PATH="$SCRIPT_DIR/update_ip.log"
+LOG_FILE_PATH="$SCRIPT_DIR/logs/update_ip.log"
+mkdir -p "$SCRIPT_DIR/logs"
 
 source "$SCRIPT_DIR/../scripts/read-env.sh"
 
@@ -31,5 +32,6 @@ SUBDOMAIN="${DOMAIN%.duckdns.org}"
 
 # The URL is passed through stdin, so the token doesn't show up in the process list
 echo url="https://www.duckdns.org/update?domains=$SUBDOMAIN&token=$DUCKDNS_TOKEN&ip=" | curl -s -K - | tee "$LOG_FILE_PATH"
+echo
 echo "Done"
 echo

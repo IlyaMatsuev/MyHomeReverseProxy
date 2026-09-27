@@ -28,7 +28,8 @@ chmod 600 "$ENV_PATH"
 
 # Traefik doesn't load routes.yaml without it
 if [ -z "$(grep -E '^PROXY_API_KEY=' "$ENV_PATH" | tail -n 1 | cut -d '=' -f 2-)" ]; then
-  echo "Warning: PROXY_API_KEY is empty in $ENV_PATH. Generate a token with \"npm run traefik:token:generate [alias]\" and set it there"
+  echo "Warning: PROXY_API_KEY is empty in \"$ENV_PATH\""
+  echo "Generate a token with \"npm run traefik:token:generate [alias]\" and set it there"
 fi
 
 copy_if_missing "$ROOT_DIR/traefik/config/routes.yaml.example" "$ROOT_DIR/traefik/config/routes.yaml"

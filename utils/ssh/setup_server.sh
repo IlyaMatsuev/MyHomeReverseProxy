@@ -37,6 +37,8 @@ fi
 
 echo "This disables password and root login on this server. Only \"$SSH_USER\" will be able to log in, and only with an SSH key."
 echo "Make sure you've run \"npm run ssh:setup:client <alias> <server-ip> <server-user>\" on your client first."
+echo
+
 # Ctrl+C stops the script here, nothing is changed before this point
 read -r -p "Press Enter to continue or Ctrl+C (or Command+C) to cancel..."
 
@@ -93,7 +95,9 @@ EOF
 fail2ban-client --test >/dev/null
 systemctl enable fail2ban
 systemctl restart fail2ban
+
+echo
 echo "fail2ban: IPs are banned for a day after 3 failed login attempts within an hour. To change rate-limit settings, edit:"
 echo "  sudo nano \"$FAIL2BAN_JAIL_PATH\" && sudo fail2ban-client reload"
-
+echo
 echo "Done. Keep this session open and run \"npm run ssh:verify <alias>\" on your client to verify the connection"
