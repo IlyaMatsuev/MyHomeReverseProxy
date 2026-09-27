@@ -4,12 +4,14 @@
 # Stop it with Ctrl+C.
 
 # Usage Example:
-# $ npm run traefik:logs [lines]
+# $ npm run traefik:logs [lines=5]
 # $ npm run traefik:logs
 # $ npm run traefik:logs 100
-# [lines] is how many lines of each log to print first (20 by default)
+# $ NO_COLOR=1 npm run traefik:logs
+# [lines] is how many lines of each log to print first (5 by default)
+# NO_COLOR=1 prints without colors (they are also off when the output isn't a terminal)
 
-LINES="${1:-20}"
+LINES="${1:-5}"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 LOGS_DIR="$SCRIPT_DIR/../logs"
 
@@ -26,33 +28,39 @@ if ! command -v jq >/dev/null 2>&1; then
   exit 1
 fi
 
-echo "=== traefik.log ==="
+# Colors only in a terminal, not when the output is saved to a file. NO_COLOR=1 turns them off
+if [ -t 1 ] && [ -z "$NO_COLOR" ]; then
+  COLOR=true
+else
+  COLOR=false
+fi
+# Terminal color codes: 1 bold, 2 dim, 31 red, 32 green, 33 yellow
+style() {
+  if [ "$COLOR" = true ]; then printf '\033[%sm' "$1"; fi
+}
+BOLD="$(style 1)"
+DIM="$(style 2)"
+RED="$(style 31)"
+GREEN="$(style 32)"
+YELLOW="$(style 33)"
+RESET="$(style 0)"
+
+echo "${BOLD}===== Traefik server logs =====${RESET}"
 # Traefik creates it readable by root only
 if [ -r "$LOGS_DIR/traefik.log" ]; then
   tail -n "$LINES" "$LOGS_DIR/traefik.log"
 else
   sudo tail -n "$LINES" "$LOGS_DIR/traefik.log"
-fi
+fi | sed -e "s/ INF / ${GREEN}INF${RESET} /" -e "s/ ERR / ${RED}ERR${RESET} /" -e "s/ WRN / ${YELLOW}WRN${RESET} /"
 echo
 
-echo "=== access.log ==="
-printf '%-14s  %-6s  %-6s  %-8s  %-6s  %-15s  %-14s  %-20s  %-35s  %s\n' \
+echo "${BOLD}===== Incoming requests =====${RESET}"
+if [ "$COLOR" = true ]; then
+  echo "${DIM}Status: $(style '1;32')2xx${RESET}${DIM} $(style '1;36')3xx${RESET}${DIM} $(style '1;35')401/403/429${RESET}${DIM} (no token, rate limit) $(style '1;33')4xx${RESET}${DIM} $(style '1;31')5xx${RESET}${DIM}. Dimmed rows: no router matched (bots)${RESET}"
+fi
+printf "$(style '1;4')%-14s  %-6s  %-6s  %-8s  %-6s  %-15s  %-14s  %-20s  %-35s  %s${RESET}\n" \
   TIME STATUS ORIGIN DURATION SIZE CLIENT HOST ROUTER REQUEST USER-AGENT
-# -F keeps following the file after logrotate empties it. Lines that aren't JSON are skipped
+
+# -F keeps following the file after logrotate empties it
 tail -n "$LINES" -F "$LOGS_DIR/access.log" |
-  jq --unbuffered -R -r --arg domain "$DOMAIN" '
-    def pad(n): tostring | if length < n then . + " " * (n - length) else . end;
-    def size: if . < 1024 then "\(.)B" elif . < 1048576 then "\(. / 1024 | floor)K" else "\(. / 1048576 | floor)M" end;
-    fromjson? | [
-      (.time[5:10] + " " + .time[11:19] | pad(14)),
-      (.DownstreamStatus | pad(6)),
-      # The status from the service. "-": Traefik answered by itself (no router, auth, rate limit, redirect)
-      (if (.OriginStatus // 0) == 0 then "-" else .OriginStatus end | pad(6)),
-      ((.Duration // 0) / 1000000 | floor | "\(.)ms" | pad(8)),
-      (.DownstreamContentSize // 0 | size | pad(6)),
-      (.ClientHost | pad(15)),
-      (.RequestHost // "-" | if $domain != "" and endswith("." + $domain) then .[:-($domain | length) - 1] else . end | pad(14)),
-      (.RouterName // "-" | sub("^websecure-"; "") | sub("@file$"; "") | pad(20)),
-      ("\(.RequestMethod) \(.RequestPath)" | pad(35)),
-      (.["request_User-Agent"] // "-")
-    ] | join("  ")'
+  jq --unbuffered -R -r --arg domain "$DOMAIN" --argjson color "$COLOR" -f "$SCRIPT_DIR/access_log.jq"

@@ -153,18 +153,19 @@ Traefik writes its logs to `traefik/logs` (gitignored):
 
 Logrotate routine (for `access.log`) is set up initially via `npm run traefik:setup` but if the utility was not installed, you can run `npm run traefik:logs:rotate` later to set it up separately.
 
-To read them, print the last lines of `traefik.log` and follow `access.log` as a table (needs `jq`: `sudo apt install jq`):
+To read the combined logs:
 
 ```bash
-# npm run traefik:logs [lines], 20 by default
+# npm run traefik:logs [lines=5], 5 by default
+# Requires "jq". Can be installed with "sudo apt install jq"
 npm run traefik:logs
 ```
 
-- `STATUS` - The response status. `ORIGIN` - The status from the service, `-` if Traefik answered by itself: no router matched (`404`), no valid token (`403`), rate limit (`429`), redirect, or the service is down (`502`)
-- `HOST` - The requested host without `.<DOMAIN>`, e.g. `hub`. Bots scanning the IP usually send the IP or nothing
-- `ROUTER` - The router that matched, `-` if none did
+`access.log` captures more details about the requests (TLS version, ports, service URL, etc.). Read them with:
 
-`access.log` has more fields (TLS version, ports, service URL, etc.), see them with `tail -n 1 traefik/logs/access.log | jq`.
+```bash
+tail -n 1 traefik/logs/access.log | jq
+```
 
 ## 🛠️ Troubleshooting
 

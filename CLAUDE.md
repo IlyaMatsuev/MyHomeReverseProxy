@@ -16,7 +16,7 @@ MyHomeReverseProxy, part of the MyHome ecosystem: configuration for running Trae
 - **traefik/logs/** (gitignored) - `traefik.log` (rotated by Traefik) and `access.log` (JSON, all fields, headers dropped except `User-Agent`, rotated by logrotate)
 - **traefik/scripts/setup.sh**, **pihole/scripts/setup.sh** - Create the gitignored files from their examples, never overwrite. Traefik's also warns if `PROXY_API_KEY` is empty and runs `setup_logrotate.sh` (sudo) unless `/etc/logrotate.d/traefik` already has this project's path
 - **traefik/scripts/generate_token.sh** - Prints a random token for `PROXY_API_KEY`
-- **traefik/scripts/logs.sh** - Prints the end of `traefik.log`, then follows `access.log` as a table of the useful fields (`jq`)
+- **traefik/scripts/logs.sh** - Prints the end of `traefik.log`, then follows `access.log` as a colored table of the useful fields, formatted by `access_log.jq`
 - **traefik/scripts/setup_logrotate.sh** - Writes `/etc/logrotate.d/traefik` for `access.log` (Traefik doesn't rotate it)
 - **pihole/** - PiHole env example, `data/` and `dnsmasq.d/` volumes (gitignored)
 - **utils/** - Scripts: `arp-scan/`, `duckdns/` (IP update and cron scheduling), `ssh/` (client/server setup, verify), `scripts/read-env.sh` (sourced helper that reads a variable from the root `.env`)
