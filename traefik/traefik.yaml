@@ -1,7 +1,10 @@
+# Encoded characters in paths (%2F etc.) are allowed by default, which is fine: routers match on the host only
 entryPoints:
   web:
     address: ":80"
     http:
+      # Drops request headers like X_Forwarded_For that some backends read as X-Forwarded-For
+      aliasHeadersStrategy: delete
       redirections:
         entryPoint:
           to: websecure
@@ -9,6 +12,7 @@ entryPoints:
   websecure:
     address: ":443"
     http:
+      aliasHeadersStrategy: delete
       tls: {}
 
 certificatesResolvers:
