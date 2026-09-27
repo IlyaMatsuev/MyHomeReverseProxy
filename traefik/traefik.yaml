@@ -42,11 +42,17 @@ log:
   level: INFO
 
 accessLog:
+  # JSON, so every value comes with its name
+  format: json
+  filters:
+    # Everything except 404: bots scanning the IP for common paths get it from Traefik, no router matches them
+    statusCodes: ["100-403", "405-599"]
   fields:
+    # Only these fields. The headers are dropped too, which keeps the tokens out of the log
+    defaultMode: drop
     names:
-      # Timestamps in the TZ time zone (.env) instead of UTC
-      StartUTC: drop
-    headers:
-      # Headers are dropped by default, which keeps the tokens out of the log
-      names:
-        User-Agent: keep
+      ClientHost: keep
+      RequestMethod: keep
+      RequestPath: keep
+      DownstreamStatus: keep
+      RouterName: keep
