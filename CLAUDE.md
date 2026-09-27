@@ -4,7 +4,7 @@ This document provides context for AI agents working on this project.
 
 ## Project Overview
 
-Configuration for running Traefik (reverse proxy) and PiHole (local DNS) on a home server via Docker Compose, plus helper scripts. Traefik routes `<service>.<DOMAIN>` (a wildcard DuckDNS domain) to services on different ports. Requests from the local network are always allowed; selected services are also available from the Internet with a rate limit and a custom `X-Proxy-Authorization` header (the services use `Authorization` themselves). There is no application code.
+MyHomeReverseProxy, part of the MyHome ecosystem: configuration for running Traefik (reverse proxy) and PiHole (local DNS) on a home server via Docker Compose, plus helper scripts. Traefik routes `<service>.<DOMAIN>` (a wildcard DuckDNS domain) to services on different ports. Requests from the local network are always allowed; selected services are also available from the Internet with a rate limit and a custom `X-Proxy-Authorization` header (the services use `Authorization` themselves). There is no application code.
 
 ## Structure
 

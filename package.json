@@ -1,5 +1,5 @@
 {
-  "name": "my-reverse-proxy",
+  "name": "my-home-reverse-proxy",
   "private": true,
   "version": "1.0.0",
   "description": "The project contains settings and configurations required for running a reverse proxy on the local server.",
@@ -30,7 +30,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/IlyaMatsuev/MyReverseProxy"
+    "url": "https://github.com/IlyaMatsuev/MyHomeReverseProxy"
   },
   "devDependencies": {
     "@types/node": "^22.13.4",

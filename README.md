@@ -1,4 +1,4 @@
-# My Reverse Proxy
+# My Home Reverse Proxy
 
 The project contains configuration for running [Traefik](https://traefik.io/traefik) as a reverse proxy on a home server.
 It forwards requests for subdomains of the same domain to different services running on the local network.
