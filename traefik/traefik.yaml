@@ -31,11 +31,10 @@ providers:
 api: {}
 
 experimental:
-  plugins:
-    # Downloaded on start: https://github.com/Aetherinox/traefik-api-token-middleware
+  # Plugins are downloaded on traefik:setup script
+  localPlugins:
     api-token:
       moduleName: github.com/Aetherinox/traefik-api-token-middleware
-      version: v0.1.4
 
 log:
   # Default is ERROR. INFO also shows config reloads and certificate renewals

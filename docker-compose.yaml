@@ -15,6 +15,7 @@ services:
     network_mode: host
     volumes:
       - ./traefik:/etc/traefik
+      - ./traefik/plugins-local:/plugins-local:ro
 
   pihole:
     image: pihole/pihole

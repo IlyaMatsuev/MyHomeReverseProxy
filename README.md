@@ -136,7 +136,7 @@ npm run traefik:token:generate webapp
 
 `PROXY_API_KEY` is required: an empty token would let requests without the header through, so `routes.yaml` isn't loaded without it.
 
-The check is done by the [API Token Middleware](https://github.com/Aetherinox/traefik-api-token-middleware) plugin, which Traefik downloads on start (version in [traefik.yaml](traefik/traefik.yaml)). If the download fails, the routers that use `proxy-auth` are disabled.
+The check is done by the [API Token Middleware](https://github.com/Aetherinox/traefik-api-token-middleware) plugin, which is downloaded on the first start up via the `traefik:setup`.
 
 > **Note:** The Traefik dashboard shows the middleware settings, including the token. It's available from the local network only.
 
