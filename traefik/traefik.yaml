@@ -31,8 +31,7 @@ providers:
 api: {}
 
 experimental:
-  # Read from /plugins-local/src/<moduleName>, downloaded by "npm run traefik:setup" (version in traefik/scripts/setup.sh)
-  # https://github.com/Aetherinox/traefik-api-token-middleware
+  # Plugins are downloaded on traefik:setup script
   localPlugins:
     api-token:
       moduleName: github.com/Aetherinox/traefik-api-token-middleware

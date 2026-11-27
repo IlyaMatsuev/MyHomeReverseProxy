@@ -3,8 +3,7 @@
 # This script creates the local config files from their examples. Existing files are never overwritten.
 #  - .env from .env.example
 #  - traefik/config/routes.yaml from traefik/config/routes.yaml.example
-# It downloads the api-token plugin source to traefik/plugins-local/ if the folder is missing or PLUGIN_VERSION changed
-# (delete the folder to download it again).
+# It also downloads the plugins used for traefik locally. The plugins are redownloaded if the plugin version has changed or if the plugin folder is deleted
 # It also sets up the access log rotation if it isn't set up for this project yet (asks for the sudo password).
 
 # Usage Example:
@@ -14,12 +13,28 @@ set -e
 
 ROOT_DIR="$(cd "$(dirname "$0")/../.." && pwd)"
 
+PLUGINS_DIR="$ROOT_DIR/traefik/plugins-local/src/"
+API_TOKEN_PLUGIN_MODULE=github.com/Aetherinox/traefik-api-token-middleware
+API_TOKEN_PLUGIN_VERSION=v0.1.4
+
 copy_if_missing() {
   if [ -e "$2" ]; then
     echo "Skipped $2: already exists"
   else
     cp "$1" "$2"
     echo "Created $2: fill in your values"
+  fi
+}
+
+# Usage: download_plugin <module> <version>
+download_plugin() {
+  plugin_dir="$PLUGINS_DIR$1"
+  if [ -d "$plugin_dir" ] && [ "$(git --git-dir="$plugin_dir/.git" describe --tags --exact-match 2>/dev/null)" = "$2" ]; then
+    echo "Skipped $plugin_dir: $2 already exists"
+  else
+    rm -rf "$plugin_dir"
+    git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$2" "https://$1.git" "$plugin_dir"
+    echo "Created $plugin_dir: $2"
   fi
 }
 
@@ -37,18 +52,7 @@ fi
 
 copy_if_missing "$ROOT_DIR/traefik/config/routes.yaml.example" "$ROOT_DIR/traefik/config/routes.yaml"
 
-# Traefik loads the proxy-auth plugin from disk: a remote plugin is downloaded on every start, and a failed
-# download (e.g. no network yet after a reboot) disables all routers that use it
-PLUGIN_MODULE=github.com/Aetherinox/traefik-api-token-middleware
-PLUGIN_VERSION=v0.1.4
-PLUGIN_DIR="$ROOT_DIR/traefik/plugins-local/src/$PLUGIN_MODULE"
-if [ -d "$PLUGIN_DIR" ] && [ "$(git --git-dir="$PLUGIN_DIR/.git" describe --tags --exact-match 2>/dev/null)" = "$PLUGIN_VERSION" ]; then
-  echo "Skipped $PLUGIN_DIR: $PLUGIN_VERSION already exists"
-else
-  rm -rf "$PLUGIN_DIR"
-  git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$PLUGIN_VERSION" "https://$PLUGIN_MODULE.git" "$PLUGIN_DIR"
-  echo "Created $PLUGIN_DIR: $PLUGIN_VERSION"
-fi
+download_plugin "$API_TOKEN_PLUGIN_MODULE" "$API_TOKEN_PLUGIN_VERSION"
 
 # Skip if logrotate routine file already exists
 LOGROTATE_CONFIG_PATH=/etc/logrotate.d/traefik

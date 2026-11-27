@@ -15,7 +15,6 @@ services:
     network_mode: host
     volumes:
       - ./traefik:/etc/traefik
-      # Traefik looks for local plugins relative to its working directory "/"
       - ./traefik/plugins-local:/plugins-local:ro
 
   pihole:
