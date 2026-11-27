@@ -29,6 +29,9 @@ traefik/logs/
 # Routes
 traefik/config/routes.yaml
 
+# Plugins (downloaded by traefik/scripts/setup.sh)
+traefik/plugins-local/
+
 # SSL
 traefik/acme/**
 !traefik/acme/README.md
